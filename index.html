@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hazardous Earth — GCSE Geography Expedition</title>
+<style>
+/* ============================================================
+   THEME
+   ============================================================ */
+:root{
+  --bg:#0a1020;
+  --bg-2:#0e1729;
+  --panel:#131f36;
+  --panel-2:#18273f;
+  --line:#26395a;
+  --ink:#e9eff8;
+  --muted:#93a6c4;
+  --dim:#6b7f9e;
+  --tok:#3ad4bb;
+  --gold:#f5b93f;
+  --bad:#ff6f5e;
+  --good:#4fdc95;
+  --ocean:#081426;
+  --c-constructive:#4fdc95;
+  --c-destructive:#ff7a5e;
+  --c-conservative:#ffd166;
+  --c-collision:#b98cff;
+  --shadow:0 18px 50px rgba(0,0,0,.55);
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 700px at 70% -10%, #16264400, #0a1020 70%),
+    var(--bg);
+  color:var(--ink);
+  font:15px/1.55 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.015em}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 20px 60px}
+
+/* ============================================================
+   HEADER / HUD
+   ============================================================ */
+.hud{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:14px 18px;margin-bottom:18px;
+  background:linear-gradient(180deg,var(--panel),var(--bg-2));
+  border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);
+}
+.brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+.brand h1{font-size:17px}
+.brand .sub{font-size:12px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+.tokens{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 14px;border-radius:999px;
+  background:rgba(58,212,187,.10);border:1px solid rgba(58,212,187,.35);
+  color:var(--tok);font-weight:650;font-variant-numeric:tabular-nums;
+}
+.tokens .gem{font-size:15px}
+.tokens .n{font-size:18px}
+.hud .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.35}
+.btn{
+  padding:9px 16px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel-2);font-weight:550;transition:.15s;
+}
+.btn:hover{background:#213353;border-color:#38537f}
+.btn.primary{background:var(--tok);color:#062b25;border-color:transparent}
+.btn.primary:hover{background:#4ee6cd}
+.btn.ghost{background:none}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ============================================================
+   LEVEL RAIL
+   ============================================================ */
+.rail{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:14px}
+.lvl{
+  flex:0 0 auto;min-width:150px;padding:10px 13px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);opacity:.5;
+}
+.lvl .no{font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
+.lvl .nm{font-size:13px;font-weight:600;margin-top:3px}
+.lvl.active{opacity:1;border-color:var(--tok);background:linear-gradient(180deg,#173a3a,#132437)}
+.lvl.active .no{color:var(--tok)}
+.lvl.done{opacity:1;border-color:var(--good)}
+
+/* ============================================================
+   MAP
+   ============================================================ */
+.mapcard{
+  background:linear-gradient(180deg,#0c1730,#0a1224);
+  border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;box-shadow:var(--shadow);position:relative;
+}
+.maptop{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.maptop h2{font-size:15px;margin-right:auto}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.key i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.toggle{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#081426;touch-action:manipulation}
+.land{fill:#1b2c46;stroke:#33507a;stroke-width:.8}
+.ice{fill:#22354f;stroke:#3b5b86;stroke-width:.8}
+.boundary{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.cellband{fill:#3ad4bb;opacity:.05}
+.cellline{stroke:#3ad4bb;stroke-width:.6;opacity:.3;stroke-dasharray:4 5}
+.celltext{fill:#5f7ea3;font-size:8px;letter-spacing:.12em}
+.pin{cursor:pointer}
+.pin .halo{fill:var(--gold);opacity:.16}
+.pin .dot{fill:var(--gold);stroke:#0a1020;stroke-width:1.6}
+.pin.done .dot{fill:var(--good)}
+.pin.done .halo{fill:var(--good);opacity:.14}
+.pin .lbl{fill:#cfe0f5;font-size:8.5px;font-weight:600;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#0a1020;stroke-width:2.6;stroke-linejoin:round}
+.pin:hover .halo{opacity:.34}
+.pin .ring{fill:none;stroke:var(--gold);stroke-width:1.1;opacity:.5}
+.pin.done .ring{stroke:var(--good)}
+
+/* ============================================================
+   SITE LIST
+   ============================================================ */
+.sites{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:16px}
+.site{
+  text-align:left;padding:13px 15px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);transition:.15s;
+}
+.site:hover{border-color:#3f5f8f;transform:translateY(-1px)}
+.site .st{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.site .sn{font-weight:650;margin:3px 0 4px}
+.site .sd{font-size:12.5px;color:var(--muted)}
+.site .sc{margin-top:8px;font-size:11.5px;color:var(--tok);font-weight:600}
+.site.done{border-color:rgba(79,220,149,.45)}
+.site.done .sc{color:var(--good)}
+
+/* ============================================================
+   FINALE CARD
+   ============================================================ */
+.finale{
+  margin-top:16px;padding:18px 20px;border-radius:var(--r);
+  border:1px dashed var(--line);background:var(--bg-2);
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+.finale.ready{border:1px solid var(--gold);background:linear-gradient(180deg,#2a2210,#131c2e)}
+.finale .ft{margin-right:auto}
+.finale h3{font-size:15px}
+.finale p{margin:5px 0 0;font-size:13px;color:var(--muted);max-width:62ch}
+.bar{height:6px;border-radius:99px;background:#1d2c46;overflow:hidden;margin-top:9px;max-width:320px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--tok),var(--gold));transition:width .4s}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.scrim{
+  position:fixed;inset:0;background:rgba(4,8,17,.78);backdrop-filter:blur(5px);
+  display:flex;align-items:flex-start;justify-content:center;padding:26px 16px;
+  overflow-y:auto;z-index:50;
+}
+.scrim[hidden]{display:none}
+.modal{
+  width:min(760px,100%);background:var(--bg-2);border:1px solid var(--line);
+  border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+}
+.mhead{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;background:var(--panel)}
+.mhead .loc{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+.mhead h2{font-size:16px;margin-top:2px}
+.mhead .prog{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mbody{padding:20px}
+.mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;background:var(--panel)}
+.mfoot .sp{margin-left:auto}
+.x{font-size:20px;color:var(--dim);line-height:1;padding:4px 8px;border-radius:8px}
+.x:hover{color:var(--ink);background:#22334f}
+
+.qtype{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.qtext{font-size:16.5px;font-weight:600;line-height:1.45;margin-bottom:14px}
+.opts{display:grid;gap:8px}
+.opt{
+  text-align:left;padding:12px 15px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);transition:.12s;
+}
+.opt:hover:not(:disabled){border-color:#4a6ea8;background:var(--panel-2)}
+.opt.correct{border-color:var(--good);background:rgba(79,220,149,.12)}
+.opt.wrong{border-color:var(--bad);background:rgba(255,111,94,.12)}
+.opt:disabled{cursor:default}
+.opt .k{display:inline-block;width:22px;color:var(--dim);font-weight:600}
+
+.fb{margin-top:14px;padding:13px 15px;border-radius:11px;font-size:14px;line-height:1.5}
+.fb.ok{background:rgba(79,220,149,.10);border:1px solid rgba(79,220,149,.35)}
+.fb.no{background:rgba(255,111,94,.10);border:1px solid rgba(255,111,94,.35)}
+.fb.hint{background:rgba(245,185,63,.10);border:1px solid rgba(245,185,63,.35)}
+.fb b{color:var(--ink)}
+.fb .earn{display:inline-block;margin-top:7px;font-size:12.5px;font-weight:650;color:var(--tok)}
+
+/* sequencing */
+.seq{display:grid;gap:8px}
+.seq .step{
+  display:flex;gap:11px;align-items:center;text-align:left;
+  padding:11px 14px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
+}
+.seq .step:hover:not(:disabled){border-color:#4a6ea8}
+.seq .step.picked{border-color:var(--tok);background:rgba(58,212,187,.10);opacity:.75}
+.seq .step.bad{border-color:var(--bad);background:rgba(255,111,94,.12)}
+.seq .num{
+  flex:0 0 24px;height:24px;border-radius:7px;background:var(--panel-2);
+  display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--dim);
+}
+.seq .step.picked .num{background:var(--tok);color:#062b25}
+
+/* matching */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match .col{display:grid;gap:8px;align-content:start}
+.match .ch{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
+.mi{
+  text-align:left;padding:10px 13px;border-radius:10px;font-size:13.5px;
+  background:var(--panel);border:1px solid var(--line);transition:.12s;
+}
+.mi:hover:not(:disabled){border-color:#4a6ea8}
+.mi.sel{border-color:var(--gold);background:rgba(245,185,63,.12)}
+.mi.gone{opacity:.32;border-style:dashed;cursor:default}
+.mi.flash{border-color:var(--bad);background:rgba(255,111,94,.14)}
+
+/* labelling */
+.diagram{background:#0a1526;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:12px}
+.diagram svg{display:block;width:100%;height:auto}
+.hot{cursor:pointer;fill:rgba(245,185,63,.05);stroke:rgba(245,185,63,.5);stroke-width:1.3;stroke-dasharray:5 4}
+.hot:hover{fill:rgba(245,185,63,.16)}
+.hot.got{fill:rgba(79,220,149,.22);stroke:var(--good);stroke-dasharray:none;cursor:default}
+.hot.miss{fill:rgba(255,111,94,.20);stroke:var(--bad)}
+.dlabel{fill:#9fb4d4;font-size:9px}
+.dtitle{fill:#cfe0f5;font-size:11px;font-weight:600}
+
+/* data */
+.chart{background:#0a1526;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.chart .ct{font-size:13px;font-weight:600;margin-bottom:2px}
+.chart .cs{font-size:11.5px;color:var(--dim);margin-bottom:10px}
+table.data{width:100%;border-collapse:collapse;font-size:13px}
+table.data th,table.data td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line)}
+table.data th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);font-weight:600}
+table.data td:first-child{font-weight:600}
+
+/* exam */
+textarea.exam{
+  width:100%;min-height:130px;padding:13px 15px;border-radius:11px;resize:vertical;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink);font:inherit;line-height:1.5;
+}
+textarea.exam:focus{outline:0;border-color:var(--tok)}
+.scheme{margin-top:14px;padding:14px 16px;border-radius:11px;background:var(--panel);border:1px solid var(--line)}
+.scheme h4{margin:0 0 4px;font-size:13px}
+.scheme .note{font-size:12px;color:var(--dim);margin-bottom:11px}
+.scheme label{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13.5px;cursor:pointer;border-top:1px solid rgba(38,57,90,.6)}
+.scheme label input{margin-top:3px;accent-color:var(--tok);width:16px;height:16px;flex:0 0 auto}
+
+/* brief / case study panel */
+.brief{
+  padding:14px 16px;border-radius:12px;margin-bottom:18px;
+  background:linear-gradient(180deg,#152640,#111c30);border:1px solid var(--line);
+}
+.brief h4{margin:0 0 6px;font-size:13px;color:var(--gold)}
+.brief p{margin:0;font-size:13.5px;color:#c3d3ea;line-height:1.55}
+.facts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.facts span{font-size:11.5px;padding:4px 10px;border-radius:99px;background:#0e1a2e;border:1px solid var(--line);color:var(--muted)}
+
+/* summary */
+.sum{text-align:center;padding:14px 0}
+.sum .big{font-size:44px;font-weight:700;color:var(--tok);font-variant-numeric:tabular-nums}
+.sum .cap{color:var(--muted);font-size:13.5px;margin-top:4px}
+.sum .line{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+
+/* finale shop */
+.budget{
+  display:flex;align-items:center;gap:12px;padding:12px 15px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);margin-bottom:16px;
+  position:sticky;top:0;z-index:2;
+}
+.budget .lab{font-size:12px;color:var(--muted)}
+.budget .amt{font-size:20px;font-weight:700;color:var(--tok);font-variant-numeric:tabular-nums}
+.cat{margin-bottom:18px}
+.cat>h4{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.cat>.cd{font-size:12.5px;color:var(--dim);margin-bottom:9px}
+.buy{
+  width:100%;text-align:left;display:flex;gap:13px;align-items:flex-start;
+  padding:12px 15px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
+  margin-bottom:8px;transition:.12s;
+}
+.buy:hover:not(:disabled){border-color:#4a6ea8}
+.buy.on{border-color:var(--tok);background:rgba(58,212,187,.10)}
+.buy:disabled{opacity:.42;cursor:not-allowed}
+.buy .bn{font-weight:600;font-size:14px}
+.buy .bd{font-size:12.5px;color:var(--muted);margin-top:3px}
+.buy .cost{
+  margin-left:auto;flex:0 0 auto;font-weight:700;color:var(--tok);
+  font-variant-numeric:tabular-nums;font-size:13.5px;white-space:nowrap;
+}
+.buy.on .cost::after{content:" ✓"}
+
+/* outcome */
+.outcome{text-align:center;padding:6px 0 2px}
+.medal{font-size:52px;line-height:1}
+.outcome h2{font-size:24px;margin:8px 0 4px}
+.outcome .tag{font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.stat{padding:13px;border-radius:11px;background:var(--panel);border:1px solid var(--line);text-align:center}
+.stat .v{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+.debrief{text-align:left;font-size:13.5px;line-height:1.6}
+.debrief h4{font-size:13px;color:var(--gold);margin:16px 0 7px}
+.debrief li{margin-bottom:7px;color:#c3d3ea}
+.debrief li b{color:var(--ink)}
+
+@media (max-width:640px){
+  .wrap{padding:12px 12px 40px}
+  .match{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+  .hud{gap:12px}
+  .brand h1{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ================= HUD ================= -->
+  <header class="hud">
+    <div class="brand">
+      <h1>Hazardous Earth — Expedition</h1>
+      <div class="sub">Edexcel GCSE Geography B · Component 1 · Topic 1</div>
+    </div>
+    <div class="tokens" title="Tokens earned from challenges. Spend them in the level finale.">
+      <span class="gem">◈</span><span class="n" id="tokCount">0</span>
+    </div>
+    <div class="meta">
+      <div id="siteCount">0 / 8 sites surveyed</div>
+      <div id="unlockNote">Finale locked</div>
+    </div>
+    <button class="btn ghost" id="resetBtn" title="Wipe saved progress">Reset</button>
+  </header>
+
+  <!-- ================= LEVEL RAIL ================= -->
+  <nav class="rail" id="rail"></nav>
+
+  <!-- ================= MAP ================= -->
+  <section class="mapcard">
+    <div class="maptop">
+      <h2>Fly to a case study</h2>
+      <div class="key">
+        <span><i style="background:var(--c-constructive)"></i>Constructive</span>
+        <span><i style="background:var(--c-destructive)"></i>Destructive</span>
+        <span><i style="background:var(--c-conservative)"></i>Conservative</span>
+        <span><i style="background:var(--c-collision)"></i>Collision</span>
+      </div>
+      <label class="toggle"><input type="checkbox" id="cellsToggle"> Show circulation cells</label>
+    </div>
+    <div id="mapHost"></div>
+    <div class="sites" id="siteList"></div>
+    <div class="finale" id="finaleCard"></div>
+  </section>
+
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead">
+      <div>
+        <div class="loc" id="mLoc"></div>
+        <h2 id="mTitle"></h2>
+      </div>
+      <div class="prog" id="mProg"></div>
+      <button class="x" id="mClose" aria-label="Close">✕</button>
+    </div>
+    <div class="mbody" id="mBody"></div>
+    <div class="mfoot" id="mFoot"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================================
+   1. WORLD GEOMETRY
+   Coastlines and plate boundaries are stored as [longitude, latitude] pairs
+   and projected at runtime, so every pin sits at its true position on Earth.
+   ============================================================================ */
+
+var MAP_W = 1000, MAP_H = 500;            // equirectangular: 1 degree = 2.7778 units
+
+function project(lon, lat){
+  return { x: (lon + 180) / 360 * MAP_W, y: (90 - lat) / 180 * MAP_H };
+}
+
+var LANDMASSES = [
+  { n:"Africa", p:[[-17,21],[-17,15],[-16,12],[-13,9],[-8,4.5],[2,6],[9,4],[9,0],[13,-5],[12,-16],[15,-27],[18,-34],[25,-34],[32,-29],[35,-24],[40,-16],[40,-10],[39,-6],[41,-1],[43,2],[51,12],[43,12],[38,15],[37,22],[34,28],[32,31],[25,32],[15,32],[10,37],[3,36],[-2,35],[-6,36],[-10,30]] },
+  { n:"Eurasia", p:[[-9,36],[-9,43],[-1,43],[-1,46],[-4,48],[2,51],[4,53],[8,54],[10,58],[5,59],[5,62],[12,65],[18,69],[28,71],[33,66],[41,66],[44,68],[55,68],[60,70],[69,73],[73,68],[78,72],[90,76],[105,78],[113,74],[128,73],[140,72],[160,70],[172,67],[179,65],[170,60],[163,58],[157,52],[160,54],[153,49],[143,53],[141,46],[135,43],[130,42],[126,40],[122,39],[120,36],[122,31],[118,25],[110,21],[108,16],[106,10],[100,8],[98,8],[100,13],[97,16],[94,18],[90,22],[87,21],[80,15],[77,8],[73,15],[70,22],[67,24],[60,25],[57,26],[50,29],[48,30],[52,26],[57,23],[52,17],[45,13],[43,12],[39,20],[35,28],[35,31],[36,36],[30,36],[26,38],[24,40],[19,40],[18,40],[16,38],[15,38],[12,44],[13,45],[8,44],[3,43],[-2,36]] },
+  { n:"North America", p:[[-168,66],[-166,60],[-162,58],[-158,56],[-152,59],[-148,60],[-140,60],[-135,57],[-130,54],[-124,49],[-124,43],[-121,36],[-117,33],[-114,31],[-110,24],[-106,23],[-97,26],[-97,21],[-95,19],[-91,18],[-88,16],[-83,11],[-79,9],[-83,15],[-88,21],[-91,19],[-94,29],[-89,29],[-85,30],[-82,27],[-80,25],[-81,31],[-76,35],[-74,40],[-70,42],[-66,45],[-60,47],[-56,51],[-64,54],[-78,53],[-79,62],[-95,62],[-92,68],[-105,68],[-115,70],[-125,70],[-133,69],[-141,70],[-156,71],[-166,68]] },
+  { n:"Greenland", p:[[-45,60],[-50,64],[-53,67],[-55,70],[-60,76],[-68,78],[-62,82],[-45,83],[-30,83],[-22,80],[-20,75],[-25,72],[-32,68],[-40,64]] },
+  { n:"South America", p:[[-81,6],[-79,9],[-75,11],[-71,12],[-63,10],[-60,7],[-52,5],[-50,0],[-44,-2],[-38,-5],[-35,-8],[-39,-13],[-39,-18],[-43,-23],[-48,-25],[-53,-34],[-57,-38],[-62,-40],[-65,-45],[-68,-50],[-70,-55],[-75,-52],[-73,-45],[-73,-37],[-71,-30],[-70,-23],[-75,-15],[-77,-8],[-81,-6],[-80,-2],[-79,1],[-77,4]] },
+  { n:"Australia", p:[[113,-22],[114,-26],[115,-32],[118,-35],[125,-32],[131,-31],[135,-35],[138,-35],[140,-38],[145,-38],[150,-37],[153,-32],[153,-25],[146,-19],[142,-11],[136,-12],[130,-11],[129,-15],[124,-16],[122,-18]] },
+  { n:"Tasmania", p:[[145,-41],[148,-41],[148,-43],[145,-43]] },
+  { n:"New Zealand", p:[[172,-34],[174,-37],[178,-38],[177,-40],[174,-41],[171,-44],[167,-46],[166,-45],[170,-43],[172,-40]] },
+  { n:"Japan", p:[[130,31],[132,34],[136,35],[140,38],[141,41],[145,44],[142,45],[140,41],[137,37],[133,34],[130,33]] },
+  { n:"Great Britain", p:[[-5,50],[-3,51],[1,51],[0,53],[-1,54],[-2,56],[-3,58],[-5,58],[-6,56],[-5,54],[-3,53],[-4,51]] },
+  { n:"Ireland", p:[[-10,52],[-6,52],[-6,54],[-8,55],[-10,54]] },
+  { n:"Iceland", p:[[-24,65],[-19,66],[-15,66],[-14,65],[-18,63],[-22,64]] },
+  { n:"Philippines", p:[[120,18],[122,16],[124,13],[126,10],[126,7],[122,6],[120,10],[120,13]] },
+  { n:"Sumatra", p:[[95,5],[99,2],[104,-2],[106,-6],[102,-5],[98,1]] },
+  { n:"Java", p:[[105,-6],[114,-8],[114,-9],[105,-7]] },
+  { n:"Borneo", p:[[109,2],[114,4],[118,5],[119,1],[117,-3],[110,-3]] },
+  { n:"New Guinea", p:[[131,-1],[140,-2],[147,-6],[150,-10],[143,-9],[137,-8],[131,-3]] },
+  { n:"Madagascar", p:[[43,-12],[49,-13],[50,-18],[47,-25],[45,-22],[43,-17]] },
+  { n:"Sri Lanka", p:[[80,10],[82,8],[81,6],[80,7]] },
+  { n:"Cuba", p:[[-85,22],[-77,21],[-74,20],[-79,22],[-84,23]] }
+];
+
+var ANTARCTICA = [[-180,-72],[-160,-78],[-140,-75],[-120,-74],[-100,-73],[-80,-72],[-60,-64],[-45,-62],[-20,-70],[0,-70],[20,-70],[40,-68],[60,-67],[80,-66],[100,-66],[120,-66],[140,-67],[160,-78],[180,-78],[180,-90],[-180,-90]];
+
+/* Plate boundaries, colour-coded by type — the map itself is a revision aid. */
+var BOUNDARIES = [
+  { t:"constructive", p:[[-18,67],[-25,60],[-30,52],[-33,45],[-32,38],[-28,28],[-25,18],[-22,10],[-15,2],[-13,-8],[-12,-20],[-13,-32],[-10,-42],[-5,-50],[5,-55],[20,-55]] },
+  { t:"constructive", p:[[-105,25],[-108,15],[-105,5],[-102,-5],[-110,-20],[-115,-30],[-118,-40],[-125,-50],[-140,-55],[-160,-58],[-175,-60]] },
+  { t:"constructive", p:[[35,29],[40,20],[45,13],[52,3],[60,-10],[68,-25],[75,-38],[85,-48],[100,-50],[120,-52],[140,-55]] },
+  { t:"destructive", p:[[-72,10],[-75,-5],[-74,-18],[-72,-30],[-73,-42],[-75,-52]] },
+  { t:"destructive", p:[[-105,20],[-95,14],[-87,11],[-80,8]] },
+  { t:"destructive", p:[[-127,49],[-130,55],[-140,58],[-152,57],[-165,53],[-175,52],[-180,51]] },
+  { t:"destructive", p:[[180,51],[170,52],[163,54],[160,55],[155,48],[147,42],[143,38],[140,33],[135,30],[130,28]] },
+  { t:"destructive", p:[[128,25],[128,15],[126,8],[122,3]] },
+  { t:"destructive", p:[[95,5],[98,-2],[105,-8],[115,-11],[125,-11],[132,-6]] },
+  { t:"destructive", p:[[-175,-18],[-176,-25],[-178,-32],[-180,-36]] },
+  { t:"destructive", p:[[-5,36],[5,38],[15,38],[25,36],[35,36],[45,38]] },
+  { t:"collision", p:[[68,35],[72,34],[78,32],[85,28],[92,27],[97,28]] },
+  { t:"conservative", p:[[-115,31],[-118,34],[-122,37],[-124,40]] },
+  { t:"conservative", p:[[28,38],[33,39],[38,40],[43,40]] }
+];
+
+var BOUNDARY_COLOUR = {
+  constructive:"#4fdc95", destructive:"#ff7a5e",
+  conservative:"#ffd166", collision:"#b98cff"
+};
+
+/* Global atmospheric circulation cells, drawn as latitude bands. */
+var CELLS = [
+  { name:"POLAR CELL",  from:60,  to:90  },
+  { name:"FERREL CELL", from:30,  to:60  },
+  { name:"HADLEY CELL", from:0,   to:30  },
+  { name:"HADLEY CELL", from:-30, to:0   },
+  { name:"FERREL CELL", from:-60, to:-30 },
+  { name:"POLAR CELL",  from:-90, to:-60 }
+];
+
+/* ============================================================================
+   2. GAME CONTENT
+   Everything below is editable without touching any engine code.
+   Question types: mcq | order | match | label | data | exam
+   ============================================================================ */
+
+var LEVELS = [
+  { n:1, name:"Hazardous Earth",                  comp:"Component 1", live:true  },
+  { n:2, name:"Development Dynamics",             comp:"Component 1", live:false },
+  { n:3, name:"Challenges of an Urbanising World",comp:"Component 1", live:false },
+  { n:4, name:"UK's Evolving Physical Landscape", comp:"Component 2", live:false },
+  { n:5, name:"UK's Evolving Human Landscape",    comp:"Component 2", live:false },
+  { n:6, name:"Geographical Investigations",      comp:"Component 2", live:false },
+  { n:7, name:"People and the Biosphere",         comp:"Component 3", live:false },
+  { n:8, name:"Forests Under Threat",             comp:"Component 3", live:false },
+  { n:9, name:"Consuming Energy Resources",       comp:"Component 3", live:false }
+];
+
+var SITES = [
+
+/* ---------------------------------------------------------------- 1 ------ */
+{
+  id:"haiyan", short:"Tacloban", name:"Tacloban, Philippines", sub:"Typhoon Haiyan, 2013",
+  lon:125.00, lat:11.24, theme:"Tropical cyclone formation, structure and hazards",
+  brief:"On 8 November 2013 Typhoon Haiyan made landfall near Tacloban as a Category 5 super typhoon — one of the most powerful tropical cyclones ever to hit land. Sustained winds reached about 315 km/h and a storm surge of roughly 5 metres swept through the city. This is your developing-country cyclone case study.",
+  facts:["8 Nov 2013","Category 5","~315 km/h winds","~6,300 deaths","~$12 billion damage"],
+  qs:[
+    { t:"mcq",
+      q:"Tropical cyclones can only form over oceans warmer than a certain temperature. What is that threshold?",
+      opts:["18°C","22°C","26.5°C","32°C"], a:2,
+      hint:"Think about the heat needed to evaporate enough water to power the storm — it is well above British sea temperatures.",
+      why:"Sea surface temperatures must be at least 26.5°C, and warm to a depth of roughly 50–70 m. The warm water evaporates, and the latent heat released as that vapour condenses is the storm's energy source." },
+
+    { t:"order",
+      q:"Put the stages of tropical cyclone formation into the correct order.",
+      items:[
+        "Warm ocean (over 26.5°C) evaporates, creating warm moist air",
+        "The moist air rises rapidly, leaving an area of low pressure at the surface",
+        "Air rushes in to replace it and is deflected by the Coriolis effect, so the storm begins to spin",
+        "The rising vapour condenses, releasing latent heat that powers further rising",
+        "Bands of towering thunderstorms build around a calm central eye",
+        "The cyclone drifts west, gathering strength until it reaches land or cooler water"
+      ],
+      hint:"Start with the energy source, and finish with the storm moving away.",
+      why:"The chain is: warm sea → evaporation → rising air → low pressure → converging air deflected by Coriolis → condensation releasing latent heat → intensification. The storm weakens once cut off from warm water at landfall." },
+
+    { t:"label", diagram:"cyclone",
+      q:"Label the cross-section of a tropical cyclone.",
+      targets:[
+        { id:"eye",     prompt:"Click the eye — calm, cloud-free, with air descending and the lowest pressure." },
+        { id:"wall",    prompt:"Click the eyewall — the ring of towering cloud with the strongest winds and heaviest rain." },
+        { id:"bands",   prompt:"Click one of the spiralling rain bands." },
+        { id:"surge",   prompt:"Click the storm surge — the wall of sea water pushed onshore." }
+      ],
+      why:"The eye is a column of descending air, so it is calm and clear. The eyewall beside it has the most violent uplift, and therefore the strongest winds and heaviest rainfall. Outer rain bands spiral away from the centre. Low pressure and powerful onshore winds together raise sea level into a storm surge — usually the biggest killer." },
+
+    { t:"data",
+      chart:{ kind:"table", title:"The Saffir–Simpson scale", sub:"Tropical cyclones are ranked 1–5 by sustained wind speed.",
+        headers:["Category","Sustained wind","Typical damage"],
+        rows:[
+          ["1","119–153 km/h","Damage to roof tiles, gutters and trees"],
+          ["2","154–177 km/h","Major roof and siding damage; trees uprooted"],
+          ["3","178–208 km/h","Devastating: small buildings destroyed"],
+          ["4","209–251 km/h","Catastrophic: severe structural damage, area uninhabitable for weeks"],
+          ["5","252 km/h and above","Catastrophic: a high percentage of homes destroyed"]
+        ] },
+      q:"Haiyan hit Tacloban with sustained winds of about 315 km/h. Which category was it?",
+      opts:["Category 2","Category 3","Category 4","Category 5"], a:3,
+      hint:"Read the wind column and find which band 315 km/h falls into.",
+      why:"315 km/h is far above the 252 km/h threshold, so Haiyan was a Category 5 super typhoon — near the top of the scale as measured at landfall." },
+
+    { t:"mcq",
+      q:"Which hazard was responsible for the majority of deaths in Tacloban?",
+      opts:["High winds tearing buildings apart","The storm surge flooding the coastal city","Landslides in the hills behind the city","Lightning strikes during the storm"], a:1,
+      hint:"Tacloban sits at the head of a funnel-shaped bay, at low elevation, right on the coast.",
+      why:"A storm surge of roughly 5 m swept through low-lying Tacloban. The bay's funnel shape concentrated the water, and many residents did not understand the phrase 'storm surge' in the warnings — so they sheltered from wind in buildings that were then flooded. Storm surge is the biggest killer in most tropical cyclones." },
+
+    { t:"exam", marks:4,
+      q:"Explain two reasons why Typhoon Haiyan caused such a high death toll in the Philippines. (4 marks)",
+      scheme:[
+        "Extreme physical magnitude — a Category 5 storm with sustained winds of about 315 km/h, so few buildings could survive it.",
+        "The storm surge (around 5 m) hit a low-lying coastal city, and Tacloban's funnel-shaped bay concentrated the water.",
+        "Poor-quality housing: many homes were made of wood and corrugated iron and offered almost no protection.",
+        "The Philippines is a lower-income country, so there was limited money for defences, and emergency services were quickly overwhelmed.",
+        "Warnings were issued and around 800,000 people evacuated, but many did not understand the term 'storm surge' or had nowhere safe to go.",
+        "Blocked roads, a damaged airport and destroyed communications delayed rescue, so injured survivors could not be reached in time."
+      ],
+      why:"A strong 4-mark answer gives two reasons and develops each one, ideally linking a physical factor (magnitude, surge, low-lying coast) to a human factor (poverty, building quality, preparedness). Use place-specific detail — the examiner is looking for Tacloban, not 'a place in Asia'." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 2 ------ */
+{
+  id:"sandy", short:"New Jersey", name:"New Jersey & New York, USA", sub:"Hurricane Sandy, 2012",
+  lon:-74.00, lat:40.50, theme:"Contrasting cyclone impacts and responses in a developed country",
+  brief:"Sandy made landfall on the New Jersey coast on 29 October 2012. It was physically huge and caused around $65 billion of damage in the USA — but killed roughly 147 people directly, a tiny fraction of Haiyan's toll. This contrast between the two storms is exactly what the specification asks you to explain.",
+  facts:["29 Oct 2012","~4 m surge in New York","~147 direct deaths","~$65 billion damage","8 million homes lost power"],
+  qs:[
+    { t:"data",
+      chart:{ kind:"bars", title:"Haiyan (2013) vs Sandy (2012)", sub:"Two powerful cyclones, two very different outcomes.",
+        series:[
+          { label:"Haiyan deaths",     value:6300, of:7000, display:"~6,300", colour:"#ff7a5e" },
+          { label:"Sandy deaths",      value:147,  of:7000, display:"~147",   colour:"#4fdc95" },
+          { label:"Haiyan damage",     value:12,   of:70,   display:"~$12bn", colour:"#f5b93f" },
+          { label:"Sandy damage",      value:65,   of:70,   display:"~$65bn", colour:"#3ad4bb" }
+        ] },
+      q:"Sandy caused far more economic damage than Haiyan but far fewer deaths. What best explains this pattern?",
+      opts:[
+        "Sandy was a much weaker storm than Haiyan in every respect",
+        "Wealthier countries have more valuable property to damage, but better warnings, defences and healthcare to protect life",
+        "The USA has no coastline exposed to storms",
+        "Economic damage and death tolls are never related to development"
+      ], a:1,
+      hint:"Think about what a country's wealth buys, and what that wealth is also worth when it gets flooded.",
+      why:"This is the core development contrast. High-income countries have dense, expensive infrastructure — so the financial losses are enormous. But they also have accurate forecasting, enforced building codes, organised evacuation and well-funded emergency services, so far fewer people die. Low-income countries show the reverse: lower financial losses, far higher death tolls." },
+
+    { t:"match",
+      q:"Match each term to its meaning.",
+      pairs:[
+        ["Immediate response","Action in the hours and days after the event — rescue, shelter, emergency aid"],
+        ["Long-term response","Action over months and years — rebuilding, improving defences, restoring the economy"],
+        ["Primary effect","Damage caused directly by the hazard itself, such as buildings destroyed by wind"],
+        ["Secondary effect","Damage that follows on afterwards, such as disease spreading through flood water"],
+        ["Vulnerability","How exposed and unable to cope a population is when a hazard strikes"]
+      ],
+      hint:"Split them into two pairs — effects versus responses — and one term about people.",
+      why:"Examiners award marks for using these distinctions precisely. Primary and secondary describe effects; immediate and long-term describe responses. Vulnerability explains why the same magnitude of hazard produces different disasters in different places." },
+
+    { t:"mcq",
+      q:"The same type of storm has different names in different oceans. Which is correct?",
+      opts:[
+        "Hurricane in the North Atlantic, typhoon in the north-west Pacific, cyclone in the Indian Ocean",
+        "Typhoon in the North Atlantic, hurricane in the Indian Ocean, cyclone in the Pacific",
+        "Cyclone in the North Atlantic, hurricane in the Indian Ocean, typhoon in the Southern Ocean",
+        "They are entirely different storms with different formation processes"
+      ], a:0,
+      hint:"Sandy hit America; Haiyan hit the Philippines. What was each one called?",
+      why:"They are the same phenomenon — a tropical cyclone — named by region: hurricane in the North Atlantic and north-east Pacific, typhoon in the north-west Pacific, and cyclone in the Indian Ocean and around Australia." },
+
+    { t:"mcq",
+      q:"Which of these is the clearest example of a long-term response to Hurricane Sandy?",
+      opts:[
+        "Evacuating low-lying parts of New York City before landfall",
+        "The Coast Guard rescuing people from flooded homes",
+        "Building flood barriers and raising electrical equipment above ground level in Manhattan",
+        "Handing out bottled water in the days after the storm"
+      ], a:2,
+      hint:"Which one takes years and reduces the damage from the *next* storm?",
+      why:"Flood barriers and relocated infrastructure take years to plan and build and reduce future risk — a long-term response. Evacuation is preparation before the event; rescue and water distribution are immediate responses." },
+
+    { t:"exam", marks:4,
+      q:"Explain why tropical cyclones of similar strength can have very different impacts in developed and developing countries. (4 marks)",
+      scheme:[
+        "Developed countries have accurate forecasting and monitoring, so warnings arrive earlier and evacuation is organised — fewer deaths.",
+        "Building regulations are enforced in developed countries, so structures survive high winds; informal housing in developing countries is easily destroyed.",
+        "Emergency services and healthcare are better funded and better equipped, so the injured are reached and treated.",
+        "Developing countries often have a higher population density in vulnerable low-lying coastal areas, with fewer safe evacuation options.",
+        "Developed countries lose far more in economic terms because infrastructure and property are worth more.",
+        "Recovery is faster in a developed country because insurance and government funds pay for rebuilding, whereas developing countries depend on international aid."
+      ],
+      why:"The strongest answers compare, rather than describing two places separately. Use a linked pair of case studies — Haiyan and Sandy work perfectly — and make sure at least one point is about deaths and one about economic cost, because the pattern runs in opposite directions." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 3 ------ */
+{
+  id:"nepal", short:"Gorkha", name:"Gorkha & Kathmandu, Nepal", sub:"Nepal earthquake, 2015",
+  lon:84.70, lat:28.20, theme:"Collision boundaries and tectonic hazards in a low-income country",
+  brief:"On 25 April 2015 a magnitude 7.8 earthquake struck the Gorkha district, about 80 km north-west of Kathmandu, with a shallow focus roughly 15 km down. It killed around 8,900 people. Nepal sits on the collision boundary where the Indian plate is driving into the Eurasian plate and pushing up the Himalayas.",
+  facts:["25 April 2015","Magnitude 7.8","Focus ~15 km deep","~8,900 deaths","~600,000 homes destroyed"],
+  qs:[
+    { t:"mcq",
+      q:"Which type of plate boundary runs beneath Nepal and the Himalayas?",
+      opts:["Constructive","Destructive","Conservative","Collision"], a:3,
+      hint:"Two plates of the same type are involved, and neither one can sink.",
+      why:"The Indian and Eurasian plates are both continental, so neither is dense enough to subduct. Instead the crust crumples upwards into fold mountains — the Himalayas. Collision boundaries give powerful, shallow-focus earthquakes but no volcanoes." },
+
+    { t:"mcq",
+      q:"What is the difference between the focus and the epicentre of an earthquake?",
+      opts:[
+        "The focus is the point underground where the earthquake starts; the epicentre is the point on the surface directly above it",
+        "The focus is on the surface; the epicentre is underground",
+        "They are two words for exactly the same place",
+        "The focus is where the most damage occurs; the epicentre is where the fault is"
+      ], a:0,
+      hint:"One is a depth, one is a map position.",
+      why:"The focus (or hypocentre) is where the rock actually fractures underground. The epicentre is the surface point directly above it. Nepal's focus was shallow at roughly 15 km, which is why the shaking at the surface was so destructive." },
+
+    { t:"order",
+      q:"Put these consequences of the Nepal earthquake into the order they occurred.",
+      items:[
+        "Violent ground shaking collapses poorly built homes across Kathmandu",
+        "Landslides triggered by the shaking bury villages and block mountain roads",
+        "International search-and-rescue teams fly in and set up field hospitals",
+        "Tens of thousands of survivors live in temporary tented camps through the monsoon",
+        "Schools and heritage sites are rebuilt to a stronger earthquake-resistant standard"
+      ],
+      hint:"Primary effect, then secondary effect, then immediate response, then long-term response.",
+      why:"This sequence is the exam framework in action: primary effect (shaking collapses buildings) → secondary effect (landslides) → immediate response (search and rescue) → longer-term response (temporary shelter, then rebuilding). Being able to sort events this way earns marks in almost every hazard question." },
+
+    { t:"match",
+      q:"Match each tectonic hazard term to its definition.",
+      pairs:[
+        ["Liquefaction","Saturated soil is shaken until it behaves like a liquid and buildings sink into it"],
+        ["Aftershock","A smaller earthquake following the main one, which can topple already weakened buildings"],
+        ["Landslide","Slope material is shaken loose and slides downhill, burying land and blocking routes"],
+        ["Tsunami","A series of waves generated when the sea floor is suddenly displaced"]
+      ],
+      hint:"One of these needs saturated ground, one needs the sea floor, one needs a slope.",
+      why:"Nepal is landlocked, so a tsunami was impossible there — but landslides were devastating, and a magnitude 7.3 aftershock on 12 May 2015 caused further deaths. Choosing hazards that actually fit the place is what separates a top answer from a generic one." },
+
+    { t:"exam", marks:4,
+      q:"Explain why the 2015 Nepal earthquake had such severe impacts on people. (4 marks)",
+      scheme:[
+        "The focus was shallow (around 15 km), so the seismic energy reaching the surface was intense.",
+        "The epicentre was close to Kathmandu, a densely populated capital city, so many people were exposed.",
+        "Many buildings were poorly constructed from unreinforced brick and concrete and did not meet earthquake-resistant standards.",
+        "Nepal is one of the poorest countries in Asia, so there was little money for hazard-resistant infrastructure or emergency preparation.",
+        "Mountainous terrain and landslides blocked roads, so aid could not reach remote villages quickly.",
+        "Nepal has only one international airport, which became congested and delayed the arrival of international aid.",
+        "A powerful magnitude 7.3 aftershock on 12 May caused further deaths and destroyed weakened structures."
+      ],
+      why:"Blend physical and human factors. The physical points (shallow focus, proximity to Kathmandu, mountainous relief) explain the hazard; the human points (poverty, building quality, one airport) explain why it became a disaster. Naming Kathmandu, Gorkha or Langtang gives the place-specific detail examiners reward." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 4 ------ */
+{
+  id:"chile", short:"Maule", name:"Maule, Chile", sub:"Chile earthquake, 2010",
+  lon:-72.70, lat:-35.90, theme:"Destructive boundaries and the development contrast",
+  brief:"On 27 February 2010 a magnitude 8.8 earthquake struck off the coast of Maule — around 500 times more energetic than Nepal's — yet it killed roughly 525 people. Chile sits on a destructive boundary where the Nazca plate subducts beneath the South American plate. Comparing Chile with Nepal is the cleanest way to show that magnitude does not determine the death toll.",
+  facts:["27 Feb 2010","Magnitude 8.8","~525 deaths","~$30 billion damage","Tsunami hit the coast"],
+  qs:[
+    { t:"data",
+      chart:{ kind:"bars", title:"Nepal 2015 vs Chile 2010", sub:"Chile's earthquake released vastly more energy — and killed far fewer people.",
+        series:[
+          { label:"Nepal magnitude", value:7.8,  of:10,    display:"7.8",    colour:"#ffd166" },
+          { label:"Chile magnitude", value:8.8,  of:10,    display:"8.8",    colour:"#b98cff" },
+          { label:"Nepal deaths",    value:8900, of:10000, display:"~8,900", colour:"#ff7a5e" },
+          { label:"Chile deaths",    value:525,  of:10000, display:"~525",   colour:"#4fdc95" }
+        ] },
+      q:"Chile's earthquake was much stronger yet killed about 17 times fewer people. What is the main reason?",
+      opts:[
+        "Chile's earthquake had a much deeper focus, so no shaking reached the surface",
+        "Chile is far wealthier and enforces strict earthquake-resistant building codes, with a well-drilled emergency response",
+        "Nobody lives anywhere near the Chilean coast",
+        "The magnitude scale works differently in South America"
+      ], a:1,
+      hint:"Both places got severe shaking. Ask what was standing after it — and who was ready.",
+      why:"Chile is a high-income country that experiences frequent large earthquakes, so it has invested in strict aseismic building regulations, public education and a practised emergency response. Nepal, one of the poorest countries in Asia, had weak construction and limited preparation. This is the single clearest illustration that a hazard becomes a disaster because of vulnerability, not just magnitude." },
+
+    { t:"mcq",
+      q:"At the destructive boundary off Chile, which plate subducts and why?",
+      opts:[
+        "The South American plate, because it is continental and therefore heavier",
+        "The Nazca plate, because oceanic crust is denser than continental crust",
+        "Neither — they simply slide past one another",
+        "Both plates subduct at the same time"
+      ], a:1,
+      hint:"Compare the density of oceanic and continental crust.",
+      why:"Oceanic crust is thinner but denser (basaltic) than continental crust (granitic), so the oceanic Nazca plate is forced beneath the South American plate. This forms an ocean trench, deep and powerful earthquakes, and the composite volcanoes of the Andes." },
+
+    { t:"label", diagram:"destructive",
+      q:"Label this destructive (convergent) plate boundary.",
+      targets:[
+        { id:"ocean",  prompt:"Click the oceanic plate that is being subducted." },
+        { id:"cont",   prompt:"Click the continental plate." },
+        { id:"trench", prompt:"Click the ocean trench." },
+        { id:"volc",   prompt:"Click the composite volcano." },
+        { id:"focus",  prompt:"Click the focus of the earthquake, deep along the subducting slab." }
+      ],
+      why:"Dense oceanic crust subducts beneath continental crust, forming a deep ocean trench. As the slab descends it melts, and the buoyant magma rises to build steep composite volcanoes. Friction along the descending slab generates earthquakes that get deeper further inland — the Benioff zone." },
+
+    { t:"mcq",
+      q:"The Chile earthquake also generated a tsunami. What causes a tsunami at a destructive boundary?",
+      opts:[
+        "Volcanic ash falling onto the sea surface",
+        "Strong winds generated by the earthquake",
+        "The sudden vertical displacement of the sea floor, which lifts the water column above it",
+        "Heavy rainfall following the earthquake"
+      ], a:2,
+      hint:"Something has to move a huge volume of water very quickly.",
+      why:"When the locked plate boundary suddenly slips, a section of sea floor jolts upwards and displaces the entire water column above it. The waves travel fast and low in deep water, then slow and pile up to great height in shallow coastal water. Only a magnitude 6 or larger quake with vertical sea-floor movement will normally produce one." },
+
+    { t:"mcq",
+      q:"Which statement about the relationship between magnitude and deaths is most accurate?",
+      opts:[
+        "The higher the magnitude, the higher the death toll, always",
+        "Magnitude sets the size of the hazard, but deaths depend far more on building quality, wealth and preparation",
+        "Magnitude has no effect on damage at all",
+        "Only earthquakes above magnitude 8 cause any deaths"
+      ], a:1,
+      hint:"Compare 7.8 with 8,900 deaths against 8.8 with 525.",
+      why:"Magnitude describes the energy released — the hazard. The disaster depends on exposure and vulnerability: how many people are there, what their buildings are made of, and how well prepared they are. Chile and Nepal are the standard exam evidence for this." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 5 ------ */
+{
+  id:"iceland", short:"Iceland", name:"Eyjafjallajökull, Iceland", sub:"Ash cloud eruption, 2010",
+  lon:-19.60, lat:63.60, theme:"Constructive boundaries, volcano types and volcanic hazards",
+  brief:"Iceland sits astride the Mid-Atlantic Ridge, a constructive boundary where the Eurasian and North American plates pull apart. When Eyjafjallajökull erupted in April 2010 the ash cloud closed much of European airspace: around 100,000 flights were cancelled and roughly 10 million passengers were stranded, yet nobody was killed.",
+  facts:["April 2010","Mid-Atlantic Ridge","~100,000 flights cancelled","~10 million passengers hit","No deaths"],
+  qs:[
+    { t:"mcq",
+      q:"Which two plates are pulling apart beneath Iceland?",
+      opts:["Nazca and South American","Eurasian and North American","Pacific and Philippine","Indian and Eurasian"], a:1,
+      hint:"Iceland sits in the middle of the Atlantic Ocean — look at what lies either side of it.",
+      why:"The Mid-Atlantic Ridge separates the Eurasian and North American plates. As they diverge, magma rises to fill the gap and solidifies as new oceanic crust, which is why Iceland is growing wider by a few centimetres each year." },
+
+    { t:"mcq",
+      q:"Which set of characteristics describes volcanoes typically found at constructive boundaries?",
+      opts:[
+        "Runny basaltic lava, gentle sloping shield volcanoes, relatively frequent but less explosive eruptions",
+        "Thick andesitic lava, steep composite cones, violently explosive eruptions with pyroclastic flows",
+        "No lava at all, only ash and steam",
+        "Identical in every way to volcanoes at destructive boundaries"
+      ], a:0,
+      hint:"Runnier lava lets gas escape easily. What shape does lava that flows a long way build?",
+      why:"At constructive boundaries the magma is basaltic — hot, low in silica and runny — so gas escapes easily and eruptions are comparatively gentle, building broad shield volcanoes. Destructive boundaries produce viscous, silica-rich andesitic magma that traps gas until it erupts explosively, forming steep composite cones." },
+
+    { t:"match",
+      q:"Match each volcanic hazard to its description.",
+      pairs:[
+        ["Pyroclastic flow","A fast, superheated avalanche of gas, ash and rock that flows down the volcano's flanks"],
+        ["Lahar","A mudflow of volcanic ash mixed with water, which can travel far down river valleys"],
+        ["Jökulhlaup","A sudden flood released when an eruption melts the glacier sitting above it"],
+        ["Tephra / ash fall","Fragments thrown into the air that collapse roofs, ruin crops and ground aircraft"]
+      ],
+      hint:"One is specifically Icelandic — the word itself is Icelandic.",
+      why:"Eyjafjallajökull sits beneath an ice cap, so its eruption produced jökulhlaups — glacial outburst floods that forced local evacuations. The far larger impact, though, was the ash: fine glassy particles can melt inside jet engines, which is why airspace was closed." },
+
+    { t:"mcq",
+      q:"Iceland's magma is usually runny, so why was the 2010 eruption so explosive and ash-rich?",
+      opts:[
+        "The magma had cooled completely before erupting",
+        "Meltwater from the ice cap above met the magma, flashing to steam and shattering it into fine ash",
+        "The volcano sits on a collision boundary",
+        "Strong Atlantic winds made the eruption more violent"
+      ], a:1,
+      hint:"The clue is in the name — 'jökull' means glacier.",
+      why:"Water flashing to steam on contact with magma causes violent fragmentation, shattering the lava into extremely fine, far-travelling ash. This is why an eruption that would otherwise have been modest closed European airspace for days." },
+
+    { t:"exam", marks:4,
+      q:"Explain the effects of the 2010 Eyjafjallajökull eruption beyond Iceland. (4 marks)",
+      scheme:[
+        "The ash cloud drifted over Europe and airspace was closed, cancelling around 100,000 flights.",
+        "Roughly 10 million passengers were stranded, disrupting business travel and holidays across the continent.",
+        "Airlines lost an estimated $1.7 billion in revenue during the shutdown.",
+        "Perishable exports such as Kenyan flowers and vegetables rotted because they could not be air-freighted to European markets.",
+        "Supply chains were disrupted where businesses relied on air freight for components.",
+        "The eruption showed how a moderate hazard in one country can have global economic effects because of interconnected transport networks."
+      ],
+      why:"This case study is valuable because it shows a volcanic hazard whose main impact was economic and international rather than local and fatal. Marks come from specific consequences and figures, and from noting the knock-on effect on countries like Kenya that had no direct connection to the volcano at all." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 6 ------ */
+{
+  id:"sanandreas", short:"San Andreas", name:"San Andreas Fault, California", sub:"Managing tectonic risk",
+  lon:-119.00, lat:35.00, theme:"Conservative boundaries and the four Ps of hazard management",
+  brief:"The San Andreas Fault is a conservative boundary where the Pacific plate grinds north-west past the North American plate. No crust is created or destroyed and there are no volcanoes — but the plates lock, build strain, and release it as powerful shallow earthquakes beneath one of the wealthiest regions on Earth.",
+  facts:["Conservative boundary","Pacific past North American","No volcanoes","Shallow, powerful quakes"],
+  qs:[
+    { t:"mcq",
+      q:"Which statement about conservative boundaries is correct?",
+      opts:[
+        "New crust is created as the plates move apart",
+        "Crust is destroyed as one plate subducts beneath another",
+        "Crust is neither created nor destroyed; the plates slide past each other, so there are earthquakes but no volcanoes",
+        "They produce the world's most explosive volcanoes"
+      ], a:2,
+      hint:"Nothing goes down and nothing comes up — so where would the magma come from?",
+      why:"At a conservative boundary the plates move past one another, sometimes at different speeds. No magma is generated, so there are no volcanoes — but friction locks the plates until the strain is released suddenly as a shallow, destructive earthquake." },
+
+    { t:"match",
+      q:"Match each of the four Ps of hazard management to a Californian example.",
+      pairs:[
+        ["Prediction","Seismometer networks and the ShakeAlert system, which warns seconds before shaking arrives"],
+        ["Preparation","The annual Great ShakeOut drill, in which millions practise 'drop, cover, hold on'"],
+        ["Protection","Retrofitting bridges and installing base isolators and cross-bracing in buildings"],
+        ["Planning","Zoning laws that prevent building hospitals and schools directly across the fault line"]
+      ],
+      hint:"Prediction is about knowing when; protection is about engineering; planning is about where you build.",
+      why:"Prediction = monitoring and forecasting. Preparation = education, drills and emergency plans. Protection = engineering the built environment to survive. Planning = deciding land use so vulnerable buildings are not in the highest-risk places. Using the four Ps as a structure will organise almost any management answer." },
+
+    { t:"mcq",
+      q:"Can scientists currently predict the exact date of a large earthquake?",
+      opts:[
+        "Yes — seismometers give the precise date months in advance",
+        "No — they can only give long-term probabilities for a region, plus warnings of seconds once shaking has begun",
+        "Yes, but only for conservative boundaries",
+        "No — earthquakes are entirely random and no forecasting is possible"
+      ], a:1,
+      hint:"Compare earthquakes with volcanoes, which give measurable warning signs beforehand.",
+      why:"Unlike volcanoes, which show precursors such as swelling and gas emissions, earthquakes give no reliable short-term warning. Scientists forecast probabilities over decades and use early-warning systems that detect the fast P-waves and give a few seconds before the destructive S-waves arrive. This is exactly why preparation and protection save more lives than prediction." },
+
+    { t:"data",
+      chart:{ kind:"table", title:"Cost and benefit of management strategies", sub:"Approximate relative figures used for comparison.",
+        headers:["Strategy","Relative cost","Lives protected","Weakness"],
+        rows:[
+          ["Earthquake drills in schools","Very low","High","Relies on people responding correctly"],
+          ["Aseismic building codes","High","Very high","Only applies to new or retrofitted buildings"],
+          ["Early-warning system","Medium","Medium","Gives only seconds of warning"],
+          ["Land-use zoning","Low","High","Politically difficult where land is valuable"]
+        ] },
+      q:"Based on the table, which strategy gives the greatest protection of life for the lowest cost?",
+      opts:["Aseismic building codes","Early-warning systems","Earthquake drills in schools","Nothing can protect life cheaply"], a:2,
+      hint:"Look for the row combining 'very low' cost with 'high' lives protected.",
+      why:"Education and drills are extremely cheap and highly effective, which is why they are the first strategy adopted in lower-income countries. Building codes protect more lives overall but are expensive and take decades to apply across a whole city — a genuine trade-off worth mentioning in evaluation questions." },
+
+    { t:"exam", marks:4,
+      q:"'Preparation saves more lives than prediction.' Do you agree? Justify your view. (4 marks)",
+      scheme:[
+        "Agree: earthquakes cannot be predicted precisely, so relying on prediction leaves a population unprotected.",
+        "Agree: preparation such as drills and education is cheap, reaches everyone and works even without warning.",
+        "Agree: Chile's practised emergency response helped limit deaths to around 525 despite a magnitude 8.8 earthquake.",
+        "Disagree: for volcanoes, prediction works well — monitoring allows successful evacuation before an eruption.",
+        "Disagree: early-warning systems can stop trains and shut gas lines automatically in the seconds before shaking.",
+        "Balanced judgement: prediction and preparation work best together, and protection through building codes may matter more than either.",
+        "A clear conclusion that states which you think matters most, and why."
+      ],
+      why:"Evaluation questions need a view, evidence on both sides, and a conclusion. The strongest answers say what the argument depends on — hazard type (earthquakes cannot be predicted, volcanoes largely can) and the wealth of the country deciding where to spend." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 7 ------ */
+{
+  id:"vostok", short:"Vostok", name:"Vostok Station, Antarctica", sub:"Evidence for natural climate change",
+  lon:106.80, lat:-78.50, theme:"Quaternary climate change: evidence and natural causes",
+  brief:"Ice more than three kilometres thick has been drilled at Vostok, producing a record of the atmosphere stretching back over 400,000 years. Air bubbles trapped in the ice preserve past carbon dioxide levels, and the chemistry of the ice itself records past temperature. This is the strongest evidence that the climate changed naturally long before humans burned any fossil fuels.",
+  facts:["Ice core over 3 km deep","Record over 400,000 years","Trapped air bubbles","Quaternary period"],
+  qs:[
+    { t:"data",
+      chart:{ kind:"line", title:"Atmospheric CO₂ from the Vostok ice core", sub:"Carbon dioxide concentration over the last 400,000 years.",
+        xlab:"Thousands of years ago", ylab:"CO₂ (ppm)", xmin:0, xmax:400, ymin:170, ymax:290, xflip:true,
+        series:[{ label:"CO₂ (ppm)", colour:"#3ad4bb", points:[[400,280],[385,240],[370,200],[350,225],[340,240],[332,290],[320,250],[300,220],[280,215],[270,210],[255,235],[243,280],[230,255],[215,240],[200,215],[190,200],[170,195],[150,190],[138,200],[130,285],[120,278],[110,250],[100,235],[90,230],[80,235],[70,220],[60,205],[50,200],[40,205],[30,200],[25,190],[20,185],[15,200],[12,240],[8,265],[4,275],[0,280]] }]
+      },
+      q:"Roughly how often do the warm peaks in carbon dioxide occur?",
+      opts:["About every 10,000 years","About every 100,000 years","About every 1,000 years","They occur completely at random"], a:1,
+      hint:"Count the peaks across 400,000 years of record.",
+      why:"There are about four peaks across 400,000 years, so a warm interglacial roughly every 100,000 years. That matches the eccentricity Milankovitch cycle — the change in the shape of Earth's orbit — which is strong evidence that orbital changes drive glacial and interglacial cycles." },
+
+    { t:"mcq",
+      q:"How does an ice core tell scientists about past carbon dioxide levels?",
+      opts:[
+        "The ice changes colour depending on the CO₂ level",
+        "Bubbles of ancient air are trapped as the snow compacts into ice, and that air can be analysed directly",
+        "Scientists estimate it from the thickness of each layer",
+        "CO₂ is measured from fossils found inside the ice"
+      ], a:1,
+      hint:"The ice is not a proxy here — it is a container.",
+      why:"Falling snow traps air between the flakes. As layer upon layer compacts into ice, that air is sealed into bubbles. Drilling down and releasing the bubbles gives a direct sample of the ancient atmosphere. Oxygen isotope ratios in the water molecules separately record the temperature at the time the snow fell." },
+
+    { t:"match",
+      q:"Match each source of evidence for past climate to what it reveals.",
+      pairs:[
+        ["Ice cores","Trapped air gives past greenhouse gas levels; isotopes give past temperature"],
+        ["Tree rings","Wide rings indicate warm wet years, narrow rings cool dry years, dated year by year"],
+        ["Pollen analysis","Preserved pollen in peat shows which plants grew, and therefore the climate they needed"],
+        ["Historical records","Diaries, harvest dates and paintings such as Thames frost fairs record recent centuries"]
+      ],
+      hint:"Two of these give a record going back many thousands of years; two are much more recent.",
+      why:"Ice cores give the longest record — hundreds of thousands of years. Tree rings and pollen cover thousands. Written and painted records only cover the last few hundred years but are very detailed, such as the frozen Thames during the Little Ice Age." },
+
+    { t:"mcq",
+      q:"Which of these is a Milankovitch cycle — a natural cause of long-term climate change?",
+      opts:[
+        "Changes in the shape of Earth's orbit, its axial tilt, and the wobble of its axis",
+        "The burning of coal, oil and gas since the Industrial Revolution",
+        "Deforestation of tropical rainforests",
+        "The release of methane from intensive cattle farming"
+      ], a:0,
+      hint:"Three of these options are things people do.",
+      why:"The three Milankovitch cycles are eccentricity (orbit shape, about 100,000 years), obliquity (axial tilt, about 41,000 years) and precession (the wobble of the axis, about 26,000 years). They alter how much solar radiation reaches different latitudes. The other three options are human causes — make sure you keep natural and human causes separate in the exam." },
+
+    { t:"mcq",
+      q:"What effect does a very large volcanic eruption usually have on global climate?",
+      opts:[
+        "Long-term warming lasting centuries",
+        "Short-term cooling, because ash and sulphur dioxide reflect incoming solar radiation",
+        "No measurable effect at all",
+        "Immediate melting of the polar ice caps"
+      ], a:1,
+      hint:"Think about what a haze high in the atmosphere does to sunlight.",
+      why:"Sulphur dioxide converts to sulphate aerosols in the stratosphere and reflects sunlight back to space, cooling the surface for a year or two. After the 1815 eruption of Tambora, 1816 became known in Europe and North America as 'the year without a summer'." }
+  ]
+},
+
+/* ---------------------------------------------------------------- 8 ------ */
+{
+  id:"itcz", short:"ITCZ", name:"The Equatorial Atlantic", sub:"Global atmospheric circulation",
+  lon:-25.00, lat:0.00, theme:"Circulation cells, pressure belts and world climate zones",
+  brief:"You are hovering over the Inter-Tropical Convergence Zone, the band of rising air that circles the equator. Global atmospheric circulation — three cells in each hemisphere — explains where the world's rainforests and hot deserts are, why the trade winds blow, and why tropical cyclones form where they do. Switch on 'Show circulation cells' on the map to see the bands.",
+  facts:["Three cells per hemisphere","Rising air at 0°","Sinking air at 30°","Coriolis effect deflects winds"],
+  qs:[
+    { t:"order",
+      q:"Name the circulation cells in order, starting at the equator and moving to the pole.",
+      items:["Hadley cell (0° to 30°)","Ferrel cell (30° to 60°)","Polar cell (60° to 90°)"],
+      hint:"There are only three, and the last one is named after the region it sits over.",
+      why:"Each hemisphere has three cells: Hadley (equator to 30°), Ferrel (30° to 60°) and Polar (60° to pole). They transfer surplus heat from the tropics towards the poles, which is why the tropics do not keep getting hotter and the poles do not keep getting colder." },
+
+    { t:"mcq",
+      q:"Why does the equator receive so much rainfall?",
+      opts:[
+        "Cold air sinks there, forcing moisture out of the atmosphere",
+        "Intense insolation heats the surface, so air rises, cools and condenses, creating low pressure and convectional rainfall",
+        "Ocean currents push rain clouds towards the equator",
+        "It is closest to the Sun, so the rain evaporates less"
+      ], a:1,
+      hint:"Rising air always does the same thing as it gains height.",
+      why:"The equator receives the most concentrated insolation, because the Sun's rays strike almost vertically. The heated air rises, cools with height, and its water vapour condenses — producing low pressure, towering cloud and heavy convectional rainfall. This is why tropical rainforests lie along the equator." },
+
+    { t:"mcq",
+      q:"Why are most of the world's hot deserts found at around 30° north and south?",
+      opts:[
+        "Air is rising there, so all the rain falls elsewhere",
+        "Air that rose at the equator has cooled, lost its moisture, and now descends — warming and drying as it sinks, creating high pressure",
+        "They are the closest latitudes to the Sun",
+        "Ocean currents there are unusually warm"
+      ], a:1,
+      hint:"Follow the air that rose at the equator. Where does it come back down, and what has it already lost?",
+      why:"Air rising at the equator loses its moisture as rain, moves polewards at height, then descends at roughly 30°. Sinking air warms and its capacity to hold moisture increases, so there is no condensation and no cloud — giving stable high pressure and arid conditions. The Sahara, Arabian, Kalahari and Australian deserts all sit in this belt." },
+
+    { t:"match",
+      q:"Match each latitude to its pressure and typical climate.",
+      pairs:[
+        ["0° (equator)","Low pressure, rising air, heavy convectional rain — tropical rainforest"],
+        ["30° north and south","High pressure, sinking air, very dry — hot deserts"],
+        ["60° north and south","Low pressure where cold polar and warm tropical air meet — changeable, frontal rain"],
+        ["90° (the poles)","High pressure, sinking dry air, very cold — polar desert"]
+      ],
+      hint:"Rising air always means low pressure and rain; sinking air always means high pressure and dry conditions.",
+      why:"Alternating low and high pressure belts explain the pattern of global climate zones. The UK sits near 50–60°N at the polar front, which is exactly why our weather is so changeable — warm tropical air and cold polar air are constantly meeting overhead." },
+
+    { t:"mcq",
+      q:"What does the Coriolis effect do to winds, and why does it matter for tropical cyclones?",
+      opts:[
+        "It slows winds down, so cyclones cannot form near the equator",
+        "It deflects winds — right in the northern hemisphere, left in the southern — and is zero at the equator, so cyclones cannot spin up within about 5° of it",
+        "It only affects ocean currents, not winds",
+        "It makes all winds blow directly from high to low pressure"
+      ], a:1,
+      hint:"Look at where cyclone tracks begin — never right on the equator itself.",
+      why:"Earth's rotation deflects moving air: to the right in the northern hemisphere, to the left in the southern. This is what makes a cyclone spin. The effect is zero at the equator, so tropical cyclones form between about 5° and 30° of latitude — warm enough for the energy, far enough from the equator for the spin." },
+
+    { t:"exam", marks:4,
+      q:"Explain how global atmospheric circulation creates the pattern of world climate zones. (4 marks)",
+      scheme:[
+        "Intense insolation at the equator heats the surface, so air rises and creates a belt of low pressure.",
+        "Rising air cools, water vapour condenses and heavy convectional rainfall supports tropical rainforest.",
+        "The air moves polewards at height and descends at about 30°, warming and drying as it sinks.",
+        "Sinking air creates high pressure and arid conditions, producing the world's hot desert belt.",
+        "At about 60° warm tropical air meets cold polar air, forcing air to rise again and creating low pressure and frontal rainfall.",
+        "At the poles cold dense air sinks, creating high pressure and very low precipitation — polar desert.",
+        "Surface winds blow from high to low pressure and are deflected by the Coriolis effect, giving the trade winds and westerlies."
+      ],
+      why:"This question rewards a linked chain of reasoning rather than a list. Follow one parcel of air all the way round a cell — rises, cools, rains, travels, sinks, warms, dries — and name the climate zone produced at each stage." }
+  ]
+}
+
+];
+
+/* ============================================================================
+   3. LEVEL FINALE — spend your tokens as a hazard-management budget
+   ============================================================================ */
+
+var FINALE = {
+  unlockAt: 60,
+  title: "Advising a government on tectonic risk",
+  brief: "A densely populated coastal region sits on an active plate boundary. A major earthquake is considered likely within the next twenty years. You have been given the tokens you earned in the field as your budget. Spend them across the four Ps — you cannot afford everything, so the choices you leave out matter as much as the ones you make.",
+  cats: [
+    { name:"Prediction", desc:"Knowing that an event is coming — and how much warning that actually buys you.", items:[
+      { id:"seismo", n:"Seismometer and GPS monitoring network", d:"Tracks strain building along the fault. Gives long-term probability, not a date.", cost:12, lives:4, econ:3, recov:2 },
+      { id:"alert",  n:"Earthquake early-warning alert system",  d:"Detects the fast P-waves and broadcasts an alert seconds before the damaging shaking arrives.", cost:20, lives:10, econ:6, recov:2 }
+    ]},
+    { name:"Preparation", desc:"Making sure people and services know what to do when it happens.", items:[
+      { id:"drills", n:"Earthquake drills in every school and workplace", d:"Millions practise drop, cover and hold on each year. Very cheap, very effective.", cost:8,  lives:14, econ:2, recov:3 },
+      { id:"kits",   n:"Emergency supply kits and evacuation signage",    d:"Households stock water, food and first aid; routes to high ground are clearly marked.", cost:10, lives:8,  econ:2, recov:6 },
+      { id:"teams",  n:"Trained and equipped search-and-rescue teams",    d:"Local teams reach trapped survivors in the first 24 hours, when survival rates are highest.", cost:16, lives:12, econ:3, recov:10 }
+    ]},
+    { name:"Protection", desc:"Engineering the built environment so it survives the shaking.", items:[
+      { id:"retrofit", n:"Retrofit hospitals and schools to aseismic standards", d:"Strengthens the buildings society depends on most in the hours after an earthquake.", cost:20, lives:18, econ:12, recov:12 },
+      { id:"codes",    n:"Enforce aseismic building codes on all new construction", d:"Base isolators, cross-bracing and steel frames. Expensive, slow — and the single biggest life-saver.", cost:24, lives:22, econ:20, recov:10 },
+      { id:"seawall",  n:"Tsunami sea wall and vertical evacuation towers",  d:"Protects the coastal town from the tsunami that a sea-floor rupture would generate.", cost:26, lives:16, econ:14, recov:6 }
+    ]},
+    { name:"Planning", desc:"Deciding where building is allowed in the first place.", items:[
+      { id:"zoning", n:"Land-use zoning away from the fault and liquefaction zones", d:"No new housing or critical infrastructure on the most dangerous ground.", cost:14, lives:12, econ:14, recov:8 },
+      { id:"maps",   n:"Public hazard mapping and awareness campaign",  d:"Everyone can see which ground is risky — which is what makes zoning politically possible.", cost:6, lives:6, econ:3, recov:3 }
+    ]}
+  ],
+  /* Combinations that are worth more together than apart. */
+  synergies: [
+    { needs:["alert","drills"],  lives:8, recov:0, note:"An early warning is only useful if people know what to do with those few seconds. Pairing the alert system with drills turned a siren into a survival response." },
+    { needs:["zoning","maps"],   lives:5, recov:0, note:"Publishing hazard maps made the zoning laws enforceable — residents could see why the restrictions existed, so they were accepted rather than fought." },
+    { needs:["retrofit","teams"],lives:0, recov:5, note:"Hospitals stayed standing and rescue teams could actually deliver casualties to them, so the region recovered noticeably faster." }
+  ],
+  /* Gaps the debrief will call out. */
+  gaps: [
+    { when:function(b){ return !b.retrofit && !b.codes; },
+      text:"You bought no structural protection. Collapsing buildings are the single biggest cause of death in earthquakes — this is the gap that costs the most lives." },
+    { when:function(b){ return (b.seismo||b.alert) && !b.drills && !b.kits && !b.teams; },
+      text:"You invested in prediction but not preparation. Earthquakes cannot be predicted precisely, and a warning nobody has rehearsed for saves very few people." },
+    { when:function(b){ return !b.zoning && !b.maps; },
+      text:"With no land-use planning, rebuilding happened on the same dangerous ground — including liquefaction-prone land near the fault." },
+    { when:function(b){ return !b.seawall; },
+      text:"The offshore rupture generated a tsunami and the coastal town had no barrier and nowhere high to run to." },
+    { when:function(b){ return !b.drills; },
+      text:"Drills are the cheapest life-saving measure available. Skipping them left people unsure what to do in the first thirty seconds." }
+  ]
+};
+
+/* ============================================================================
+   4. STATE
+   ============================================================================ */
+
+var SAVE_KEY = "hazardous-earth-v1";
+
+var state = { tokens:0, done:{}, finaleDone:false, finaleResult:null };
+
+function save(){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch(e){ /* private mode */ }
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return;
+    var v = JSON.parse(raw);
+    if(v && typeof v === "object"){
+      state.tokens      = v.tokens|0;
+      state.done        = v.done || {};
+      state.finaleDone  = !!v.finaleDone;
+      state.finaleResult= v.finaleResult || null;
+    }
+  } catch(e){ /* corrupt or unavailable — start fresh */ }
+}
+
+function siteById(id){
+  for(var i=0;i<SITES.length;i++) if(SITES[i].id===id) return SITES[i];
+  return null;
+}
+function doneCount(){ return Object.keys(state.done).length; }
+function el(tag, cls, html){
+  var n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(html !== undefined) n.innerHTML = html;
+  return n;
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function shuffle(a){
+  a = a.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+
+/* ============================================================================
+   5. THE MAP
+   ============================================================================ */
+
+function pathOf(points, close){
+  var d = "";
+  for(var i=0;i<points.length;i++){
+    var pt = project(points[i][0], points[i][1]);
+    d += (i ? "L" : "M") + pt.x.toFixed(1) + " " + pt.y.toFixed(1) + " ";
+  }
+  return d + (close ? "Z" : "");
+}
+
+function buildMap(){
+  var s = [];
+  s.push('<svg class="map" viewBox="0 0 '+MAP_W+' '+MAP_H+'" role="img" aria-label="World map of Hazardous Earth case studies">');
+
+  /* ocean */
+  s.push('<defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">'+
+         '<stop offset="0%" stop-color="#0b1a30"/><stop offset="55%" stop-color="#08182b"/>'+
+         '<stop offset="100%" stop-color="#0a1424"/></linearGradient></defs>');
+  s.push('<rect width="'+MAP_W+'" height="'+MAP_H+'" fill="url(#sea)"/>');
+
+  /* circulation cells (hidden by default) */
+  s.push('<g id="cellLayer" style="display:none">');
+  CELLS.forEach(function(c, i){
+    var top = project(0, Math.max(c.from,c.to)).y;
+    var bot = project(0, Math.min(c.from,c.to)).y;
+    if(i % 2 === 0) s.push('<rect class="cellband" x="0" y="'+top.toFixed(1)+'" width="'+MAP_W+'" height="'+(bot-top).toFixed(1)+'"/>');
+    s.push('<line class="cellline" x1="0" y1="'+top.toFixed(1)+'" x2="'+MAP_W+'" y2="'+top.toFixed(1)+'"/>');
+    s.push('<text class="celltext" x="8" y="'+((top+bot)/2+3).toFixed(1)+'">'+c.name+'</text>');
+  });
+  s.push('<line class="cellline" x1="0" y1="'+project(0,0).y+'" x2="'+MAP_W+'" y2="'+project(0,0).y+'"/>');
+  s.push('<text class="celltext" x="8" y="'+(project(0,0).y-4)+'">EQUATOR — ITCZ</text>');
+  s.push('</g>');
+
+  /* land */
+  s.push('<g>');
+  LANDMASSES.forEach(function(m){ s.push('<path class="land" d="'+pathOf(m.p,true)+'"/>'); });
+  s.push('<path class="ice" d="'+pathOf(ANTARCTICA,true)+'"/>');
+  s.push('</g>');
+
+  /* plate boundaries */
+  s.push('<g>');
+  BOUNDARIES.forEach(function(b){
+    s.push('<path class="boundary" stroke="'+BOUNDARY_COLOUR[b.t]+'" d="'+pathOf(b.p,false)+'"/>');
+  });
+  s.push('</g>');
+
+  /* case-study pins */
+  SITES.forEach(function(site){
+    var p = project(site.lon, site.lat);
+    var isDone = !!state.done[site.id];
+    s.push('<g class="pin'+(isDone?" done":"")+'" data-site="'+site.id+'" tabindex="0" role="button" '+
+           'aria-label="'+esc(site.name)+'">');
+    s.push('<title>'+esc(site.name+" — "+site.sub)+'</title>');
+    s.push('<circle class="halo" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="13"/>');
+    s.push('<circle class="ring" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="8"/>');
+    s.push('<circle class="dot"  cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4.5"/>');
+    s.push('<text class="lbl" x="'+p.x.toFixed(1)+'" y="'+(p.y-15).toFixed(1)+'">'+esc(site.short)+(isDone?" ✓":"")+'</text>');
+    s.push('</g>');
+  });
+
+  s.push('</svg>');
+  document.getElementById("mapHost").innerHTML = s.join("");
+
+  var cb = document.getElementById("cellsToggle");
+  var layer = document.getElementById("cellLayer");
+  if(cb && layer && cb.checked) layer.style.display = "";
+
+  Array.prototype.forEach.call(document.querySelectorAll(".pin"), function(g){
+    g.addEventListener("click", function(){ openSite(g.getAttribute("data-site")); });
+    g.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openSite(g.getAttribute("data-site")); }
+    });
+  });
+}
+
+/* ============================================================================
+   6. SHELL RENDERING
+   ============================================================================ */
+
+function renderHud(){
+  document.getElementById("tokCount").textContent = state.tokens;
+  document.getElementById("siteCount").textContent = doneCount() + " / " + SITES.length + " sites surveyed";
+  var note = document.getElementById("unlockNote");
+  if(state.finaleDone)            note.textContent = "Level 1 complete";
+  else if(state.tokens >= FINALE.unlockAt) note.textContent = "Finale unlocked";
+  else                            note.textContent = (FINALE.unlockAt - state.tokens) + " more tokens to unlock finale";
+}
+
+function renderRail(){
+  var rail = document.getElementById("rail");
+  rail.innerHTML = "";
+  LEVELS.forEach(function(l){
+    var cls = "lvl" + (l.live ? (state.finaleDone ? " done" : " active") : "");
+    var n = el("div", cls,
+      '<div class="no">Level '+l.n+(l.live?"":" · locked")+'</div>'+
+      '<div class="nm">'+esc(l.name)+'</div>');
+    n.title = l.comp + (l.live ? "" : " — unlocks after Level 1");
+    rail.appendChild(n);
+  });
+}
+
+function renderSites(){
+  var host = document.getElementById("siteList");
+  host.innerHTML = "";
+  SITES.forEach(function(site){
+    var earned = state.done[site.id];
+    var b = el("button", "site" + (earned !== undefined ? " done" : ""),
+      '<div class="st">'+esc(site.sub)+'</div>'+
+      '<div class="sn">'+esc(site.name)+'</div>'+
+      '<div class="sd">'+esc(site.theme)+'</div>'+
+      '<div class="sc">'+(earned !== undefined
+          ? "Surveyed · ◈ " + earned + " earned"
+          : site.qs.length + " challenges · up to ◈ " + (site.qs.length*3))+'</div>');
+    b.addEventListener("click", function(){ openSite(site.id); });
+    host.appendChild(b);
+  });
+}
+
+function renderFinaleCard(){
+  var card = document.getElementById("finaleCard");
+  var ready = state.tokens >= FINALE.unlockAt;
+  card.className = "finale" + (ready ? " ready" : "");
+  var pct = Math.min(100, Math.round(state.tokens / FINALE.unlockAt * 100));
+
+  if(state.finaleDone && state.finaleResult){
+    card.innerHTML =
+      '<div class="ft"><h3>Level 1 complete — '+esc(state.finaleResult.tier)+'</h3>'+
+      '<p>Your management plan saved lives in the simulated event. Replay the finale to try a different allocation, '+
+      'or revisit any site to earn more tokens first.</p></div>';
+    var again = el("button","btn primary","Replay finale");
+    again.addEventListener("click", openFinale);
+    card.appendChild(again);
+    return;
+  }
+
+  card.innerHTML =
+    '<div class="ft"><h3>Level finale — '+esc(FINALE.title)+'</h3>'+
+    '<p>Spend your tokens as a hazard-management budget, then live with the consequences. '+
+    'You need ◈ '+FINALE.unlockAt+' to begin — the more you bring, the more of the region you can protect.</p>'+
+    '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+  var go = el("button","btn primary", ready ? "Begin the finale" : "◈ "+state.tokens+" / "+FINALE.unlockAt);
+  go.disabled = !ready;
+  go.addEventListener("click", openFinale);
+  card.appendChild(go);
+}
+
+function renderAll(){ renderHud(); renderRail(); renderSites(); renderFinaleCard(); buildMap(); }
+
+/* ============================================================================
+   7. MODAL PLUMBING
+   ============================================================================ */
+
+var scrim = document.getElementById("scrim");
+
+function openModal(loc, title){
+  document.getElementById("mLoc").textContent   = loc;
+  document.getElementById("mTitle").textContent = title;
+  document.getElementById("mProg").textContent  = "";
+  document.getElementById("mBody").innerHTML    = "";
+  document.getElementById("mFoot").innerHTML    = "";
+  scrim.hidden = false;
+  scrim.scrollTop = 0;
+}
+function closeModal(){ scrim.hidden = true; renderAll(); }
+
+document.getElementById("mClose").addEventListener("click", closeModal);
+scrim.addEventListener("click", function(e){ if(e.target === scrim) closeModal(); });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape" && !scrim.hidden) closeModal(); });
+
+function foot(buttons){
+  var f = document.getElementById("mFoot");
+  f.innerHTML = "";
+  buttons.forEach(function(b){
+    if(b === null){ f.appendChild(el("div","sp")); return; }
+    var n = el("button","btn"+(b.primary?" primary":b.ghost?" ghost":""), b.label);
+    n.disabled = !!b.disabled;
+    n.addEventListener("click", b.fn);
+    f.appendChild(n);
+  });
+}
+
+/* ============================================================================
+   8. CHALLENGE ENGINE
+   Scoring: right first time = 3 tokens · after a hint = 2 · after a retry = 1
+   ============================================================================ */
+
+var run = null;   // { site, i, earned, hinted, tries, answered }
+
+function openSite(id){
+  var site = siteById(id);
+  if(!site) return;
+  run = { site:site, i:0, earned:0, hinted:false, tries:0, answered:false };
+  openModal(site.sub, site.name);
+  showBrief();
+}
+
+function showBrief(){
+  var site = run.site, body = document.getElementById("mBody");
+  body.innerHTML =
+    '<div class="brief"><h4>Field briefing</h4><p>'+esc(site.brief)+'</p>'+
+    '<div class="facts">'+site.facts.map(function(f){ return "<span>"+esc(f)+"</span>"; }).join("")+'</div></div>'+
+    '<p style="color:var(--muted);font-size:13.5px;margin:0">'+
+    '<b style="color:var(--ink)">'+site.qs.length+' challenges</b> · '+esc(site.theme)+'<br>'+
+    'Every challenge is worth <b style=\"color:var(--tok)\">◈ 3</b>. Each hint or mistake costs one token. '+
+    'You always get the full explanation afterwards, right or wrong.</p>';
+  document.getElementById("mProg").textContent = "";
+  foot([ { label:"Close", fn:closeModal, ghost:true }, null,
+         { label: state.done[site.id] !== undefined ? "Survey again" : "Begin survey", fn:nextQuestion, primary:true } ]);
+}
+
+function nextQuestion(){
+  if(run.i >= run.site.qs.length) return showSummary();
+  run.hinted = false; run.tries = 0; run.answered = false;
+  document.getElementById("mProg").textContent = "Challenge " + (run.i+1) + " of " + run.site.qs.length;
+  renderQuestion(run.site.qs[run.i]);
+}
+
+var TYPE_LABEL = { mcq:"Multiple choice", order:"Sequencing", match:"Matching pairs",
+                   label:"Label the diagram", data:"Data response", exam:"Exam question" };
+
+function renderQuestion(q){
+  var body = document.getElementById("mBody");
+  body.innerHTML = "";
+  body.appendChild(el("div","qtype", TYPE_LABEL[q.t] || ""));
+
+  var buttons = [];
+  if(q.hint) buttons.push({ label:"Hint (◈ −1)", fn:showHint, ghost:true });
+  buttons.push(null);
+  buttons.push({ label:"Skip", fn:function(){ finishQuestion(0, true); }, ghost:true });
+  foot(buttons);
+
+  if(q.t === "mcq")        renderMcq(q, body);
+  else if(q.t === "data")  renderData(q, body);
+  else if(q.t === "order") renderOrder(q, body);
+  else if(q.t === "match") renderMatch(q, body);
+  else if(q.t === "label") renderLabel(q, body);
+  else if(q.t === "exam")  renderExam(q, body);
+}
+
+function showHint(){
+  if(run.answered) return;
+  var q = run.site.qs[run.i];
+  if(!q.hint || run.hinted) return;
+  run.hinted = true;
+  var body = document.getElementById("mBody");
+  var f = el("div","fb hint","<b>Hint.</b> " + esc(q.hint));
+  body.appendChild(f);
+  f.scrollIntoView({ block:"nearest" });
+  var btns = document.getElementById("mFoot").querySelectorAll("button");
+  if(btns.length) btns[0].disabled = true;
+}
+
+/* tokens for the current question, given how it went */
+function tokensFor(){
+  if(run.tries <= 1) return run.hinted ? 2 : 3;
+  return 1;
+}
+
+/* Show the explanation and move on. */
+function finishQuestion(tokens, skipped){
+  run.answered = true;
+  var q = run.site.qs[run.i];
+  var body = document.getElementById("mBody");
+
+  var box = el("div","fb " + (tokens > 0 ? "ok" : "no"));
+  box.innerHTML = "<b>" + (skipped ? "Skipped." : tokens > 0 ? "Correct." : "Not quite.") + "</b> " + esc(q.why) +
+                  (tokens > 0 ? '<div class="earn">◈ +' + tokens + ' tokens</div>'
+                              : '<div class="earn" style="color:var(--dim)">◈ +0 tokens</div>');
+  body.appendChild(box);
+  box.scrollIntoView({ block:"nearest" });
+
+  run.earned += tokens;
+  state.tokens += tokens;
+  save();
+  document.getElementById("tokCount").textContent = state.tokens;
+
+  run.i++;
+  foot([ { label:"Close", fn:closeModal, ghost:true }, null,
+         { label: run.i >= run.site.qs.length ? "See results" : "Next challenge",
+           fn: run.i >= run.site.qs.length ? showSummary : nextQuestion, primary:true } ]);
+}
+
+function showSummary(){
+  var site = run.site;
+  var best = state.done[site.id];
+  state.done[site.id] = (best === undefined) ? run.earned : Math.max(best, run.earned);
+  save();
+
+  var max = site.qs.length * 3;
+  var body = document.getElementById("mBody");
+  document.getElementById("mProg").textContent = "";
+  body.innerHTML =
+    '<div class="sum"><div class="big">◈ '+run.earned+'</div>'+
+    '<div class="cap">earned here, out of a possible '+max+'</div>'+
+    '<div class="line">Total tokens: <b style="color:var(--tok)">◈ '+state.tokens+'</b>' +
+    (state.tokens >= FINALE.unlockAt
+      ? ' — enough to attempt the level finale.'
+      : ' — you need ◈ '+FINALE.unlockAt+' to attempt the finale.') +
+    '</div></div>';
+  foot([ { label:"Retry this site", fn:function(){ openSite(site.id); }, ghost:true }, null,
+         { label:"Back to the map", fn:closeModal, primary:true } ]);
+}
+
+/* ---- multiple choice ---------------------------------------------------- */
+
+function renderMcq(q, body, prefixHtml){
+  if(prefixHtml) body.insertAdjacentHTML("beforeend", prefixHtml);
+  body.appendChild(el("div","qtext", esc(q.q)));
+
+  var wrap = el("div","opts");
+  var letters = "ABCD".split("");
+  q.opts.forEach(function(text, idx){
+    var b = el("button","opt", '<span class="k">'+(letters[idx]||"")+'</span>'+esc(text));
+    b.addEventListener("click", function(){
+      if(run.answered) return;
+      var all = wrap.querySelectorAll(".opt");
+      if(idx === q.a){
+        b.classList.add("correct");
+        Array.prototype.forEach.call(all, function(n){ n.disabled = true; });
+        finishQuestion(tokensNow());
+      } else {
+        run.tries++;
+        b.classList.add("wrong");
+        b.disabled = true;
+        if(run.tries >= 3){
+          all[q.a].classList.add("correct");
+          Array.prototype.forEach.call(all, function(n){ n.disabled = true; });
+          finishQuestion(0);
+        }
+      }
+    });
+    wrap.appendChild(b);
+  });
+  body.appendChild(wrap);
+}
+
+/* tokens available right now: 3, minus one per mistake, minus one for a hint */
+function tokensNow(){
+  return Math.max(0, 3 - run.tries - (run.hinted ? 1 : 0));
+}
+
+/* ---- data response ------------------------------------------------------ */
+
+function renderData(q, body){
+  renderMcq(q, body, chartHtml(q.chart));
+}
+
+function chartHtml(c){
+  var h = '<div class="chart"><div class="ct">'+esc(c.title)+'</div><div class="cs">'+esc(c.sub)+'</div>';
+
+  if(c.kind === "table"){
+    h += '<div style="overflow-x:auto"><table class="data"><thead><tr>';
+    c.headers.forEach(function(x){ h += '<th>'+esc(x)+'</th>'; });
+    h += '</tr></thead><tbody>';
+    c.rows.forEach(function(r){
+      h += '<tr>';
+      r.forEach(function(x){ h += '<td>'+esc(x)+'</td>'; });
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+
+  else if(c.kind === "bars"){
+    var globalMax = 0;
+    c.series.forEach(function(s){ if(s.value > globalMax) globalMax = s.value; });
+    c.series.forEach(function(s){
+      var max = s.of || globalMax;
+      var pct = Math.max(2, Math.round(s.value / max * 100));
+      h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
+             '<div style="flex:0 0 40%;font-size:12.5px;color:var(--muted)">'+esc(s.label)+'</div>'+
+             '<div style="flex:1;height:16px;background:#132340;border-radius:5px;overflow:hidden">'+
+               '<i style="display:block;height:100%;width:'+pct+'%;background:'+s.colour+'"></i></div>'+
+             '<div style="flex:0 0 68px;text-align:right;font-weight:700;font-size:12.5px;'+
+                  'font-variant-numeric:tabular-nums">'+esc(s.display)+'</div>'+
+           '</div>';
+    });
+  }
+
+  else if(c.kind === "line"){
+    var W = 560, H = 240, L = 52, R = 542, T = 16, B = 196;
+    var px = function(x){
+      var t = (x - c.xmin) / (c.xmax - c.xmin);
+      if(c.xflip) t = 1 - t;
+      return L + t * (R - L);
+    };
+    var py = function(y){ return B - (y - c.ymin) / (c.ymax - c.ymin) * (B - T); };
+
+    h += '<svg viewBox="0 0 '+W+' '+H+'" style="display:block;width:100%;height:auto">';
+    var i, v;
+    for(i = 0; i <= 4; i++){                       // horizontal gridlines
+      v = c.ymin + (c.ymax - c.ymin) * i / 4;
+      h += '<line x1="'+L+'" y1="'+py(v).toFixed(1)+'" x2="'+R+'" y2="'+py(v).toFixed(1)+
+           '" stroke="#1d2c46" stroke-width="1"/>'+
+           '<text x="'+(L-8)+'" y="'+(py(v)+4).toFixed(1)+'" fill="#6b7f9e" font-size="10" text-anchor="end">'+
+           Math.round(v)+'</text>';
+    }
+    for(i = 0; i <= 4; i++){                       // x-axis ticks
+      v = c.xmin + (c.xmax - c.xmin) * i / 4;
+      h += '<text x="'+px(v).toFixed(1)+'" y="'+(B+18)+'" fill="#6b7f9e" font-size="10" text-anchor="middle">'+
+           Math.round(v)+'</text>';
+    }
+    c.series.forEach(function(s){
+      var d = s.points.map(function(p, k){
+        return (k ? "L" : "M") + px(p[0]).toFixed(1) + " " + py(p[1]).toFixed(1);
+      }).join(" ");
+      h += '<path d="'+d+'" fill="none" stroke="'+s.colour+'" stroke-width="2" '+
+           'stroke-linejoin="round" stroke-linecap="round"/>';
+    });
+    h += '<text x="'+((L+R)/2)+'" y="'+(H-4)+'" fill="#6b7f9e" font-size="10.5" text-anchor="middle">'+
+         esc(c.xlab)+'</text>';
+    h += '<text x="14" y="'+((T+B)/2)+'" fill="#6b7f9e" font-size="10.5" text-anchor="middle" '+
+         'transform="rotate(-90 14 '+((T+B)/2)+')">'+esc(c.ylab)+'</text>';
+    h += '</svg>';
+  }
+
+  return h + '</div>';
+}
+
+/* ---- sequencing --------------------------------------------------------- */
+
+function renderOrder(q, body){
+  body.appendChild(el("div","qtext", esc(q.q)));
+  var hint = el("div","", "Click them in the correct order.");
+  hint.style.cssText = "font-size:12.5px;color:var(--dim);margin:-8px 0 12px";
+  body.appendChild(hint);
+
+  var wrap = el("div","seq");
+  var placed = 0;
+  var order = shuffle(q.items);
+
+  order.forEach(function(text){
+    var correctIndex = q.items.indexOf(text);
+    var b = el("button","step", '<span class="num">·</span><span>'+esc(text)+'</span>');
+    b.addEventListener("click", function(){
+      if(run.answered || b.classList.contains("picked")) return;
+      if(correctIndex === placed){
+        placed++;
+        b.classList.remove("bad");
+        b.classList.add("picked");
+        b.querySelector(".num").textContent = placed;
+        if(placed === q.items.length) finishQuestion(tokensNow());
+      } else {
+        run.tries++;
+        b.classList.add("bad");
+        setTimeout(function(){ b.classList.remove("bad"); }, 550);
+        if(run.tries >= 3) revealOrder(wrap, q);
+      }
+    });
+    wrap.appendChild(b);
+  });
+  body.appendChild(wrap);
+}
+
+function revealOrder(wrap, q){
+  wrap.innerHTML = "";
+  q.items.forEach(function(text, i){
+    var n = el("div","step picked", '<span class="num">'+(i+1)+'</span><span>'+esc(text)+'</span>');
+    wrap.appendChild(n);
+  });
+  finishQuestion(0);
+}
+
+/* ---- matching pairs ----------------------------------------------------- */
+
+function renderMatch(q, body){
+  body.appendChild(el("div","qtext", esc(q.q)));
+  var tip = el("div","", "Click a term, then click its definition.");
+  tip.style.cssText = "font-size:12.5px;color:var(--dim);margin:-8px 0 12px";
+  body.appendChild(tip);
+
+  var grid = el("div","match");
+  var colL = el("div","col", '<div class="ch">Term</div>');
+  var colR = el("div","col", '<div class="ch">Meaning</div>');
+  var left = shuffle(q.pairs), right = shuffle(q.pairs);
+  var selected = null, remaining = q.pairs.length;
+
+  function clearSel(){
+    if(selected){ selected.node.classList.remove("sel"); selected = null; }
+  }
+  function flash(n){
+    n.classList.add("flash");
+    setTimeout(function(){ n.classList.remove("flash"); }, 480);
+  }
+
+  left.forEach(function(p){
+    var b = el("button","mi", esc(p[0]));
+    b.addEventListener("click", function(){
+      if(run.answered || b.classList.contains("gone")) return;
+      clearSel();
+      selected = { key:p[0], node:b };
+      b.classList.add("sel");
+    });
+    colL.appendChild(b);
+  });
+
+  right.forEach(function(p){
+    var b = el("button","mi", esc(p[1]));
+    b.addEventListener("click", function(){
+      if(run.answered || b.classList.contains("gone")) return;
+      if(!selected){ flash(b); return; }
+      if(selected.key === p[0]){
+        selected.node.classList.add("gone");
+        selected.node.classList.remove("sel");
+        b.classList.add("gone");
+        selected = null;
+        remaining--;
+        if(remaining === 0) finishQuestion(tokensNow());
+      } else {
+        run.tries++;
+        flash(b); flash(selected.node);
+        clearSel();
+        if(run.tries >= 3) revealMatch(grid, q);
+      }
+    });
+    colR.appendChild(b);
+  });
+
+  grid.appendChild(colL); grid.appendChild(colR);
+  body.appendChild(grid);
+}
+
+function revealMatch(grid, q){
+  grid.className = "";
+  grid.innerHTML = q.pairs.map(function(p){
+    return '<div class="mi gone" style="margin-bottom:8px"><b style="color:var(--ink)">'+
+           esc(p[0])+'</b> — '+esc(p[1])+'</div>';
+  }).join("");
+  finishQuestion(0);
+}
+
+/* ---- label the diagram -------------------------------------------------- */
+
+function renderLabel(q, body){
+  body.appendChild(el("div","qtext", esc(q.q)));
+
+  var host = el("div","diagram", DIAGRAMS[q.diagram]());
+  body.appendChild(host);
+
+  var promptBox = el("div","fb hint");
+  body.appendChild(promptBox);
+
+  var step = 0;
+  function ask(){
+    if(step >= q.targets.length){ finishQuestion(tokensNow()); return; }
+    promptBox.innerHTML = "<b>" + (step+1) + " of " + q.targets.length + ".</b> " + esc(q.targets[step].prompt);
+  }
+
+  Array.prototype.forEach.call(host.querySelectorAll(".hot"), function(h){
+    h.addEventListener("click", function(){
+      if(run.answered || h.classList.contains("got")) return;
+      if(h.getAttribute("data-id") === q.targets[step].id){
+        h.classList.add("got");
+        step++;
+        ask();
+      } else {
+        run.tries++;
+        h.classList.add("miss");
+        setTimeout(function(){ h.classList.remove("miss"); }, 520);
+        if(run.tries >= 3){
+          q.targets.forEach(function(t){
+            var n = host.querySelector('[data-id="'+t.id+'"]');
+            if(n) n.classList.add("got");
+          });
+          promptBox.innerHTML = "<b>Revealed.</b> The labelled features are highlighted above.";
+          finishQuestion(0);
+        }
+      }
+    });
+  });
+  ask();
+}
+
+/* ---- exam question with a self-marked mark scheme ------------------------ */
+
+function renderExam(q, body){
+  body.appendChild(el("div","qtext", esc(q.q)));
+  var note = el("div","", "Write your answer as you would in the exam, then reveal the mark scheme and mark yourself honestly.");
+  note.style.cssText = "font-size:12.5px;color:var(--dim);margin:-8px 0 12px";
+  body.appendChild(note);
+
+  var ta = el("textarea","exam");
+  ta.placeholder = "Your answer (" + q.marks + " marks)…";
+  body.appendChild(ta);
+
+  foot([ null, { label:"Reveal mark scheme", primary:true, fn:function(){ reveal(); } } ]);
+
+  function reveal(){
+    if(run.answered) return;
+    var box = el("div","scheme");
+    box.innerHTML = '<h4>Mark scheme — credit any '+q.marks+' of these</h4>'+
+                    '<div class="note">Tick every point you actually made. Be honest: the tokens are worth '+
+                    'far less than knowing what you left out.</div>';
+    q.scheme.forEach(function(pt, i){
+      var lab = el("label","", '<input type="checkbox" data-i="'+i+'"><span>'+esc(pt)+'</span>');
+      box.appendChild(lab);
+    });
+    body.appendChild(box);
+    ta.disabled = true;
+    box.scrollIntoView({ block:"nearest" });
+
+    foot([ null, { label:"Score my answer", primary:true, fn:function(){
+      var ticked = box.querySelectorAll("input:checked").length;
+      var needed = Math.min(q.marks, q.scheme.length);
+      var ratio  = ticked / needed;
+      var tok    = ratio >= 1 ? 3 : ratio >= 0.5 ? 2 : ticked > 0 ? 1 : 0;
+      Array.prototype.forEach.call(box.querySelectorAll("input"), function(n){ n.disabled = true; });
+      finishQuestion(tok);
+    }}]);
+  }
+}
+
+/* ============================================================================
+   9. DIAGRAMS
+   ============================================================================ */
+
+var DIAGRAMS = {
+
+  /* Cross-section through a tropical cyclone approaching a coast. */
+  cyclone: function(){
+    var s = '<svg viewBox="0 0 620 300" role="img" aria-label="Cross-section of a tropical cyclone">';
+    s += '<rect width="620" height="300" fill="#0b1b30"/>';
+
+    /* cirrus outflow spreading away at the top */
+    s += '<ellipse cx="310" cy="50" rx="158" ry="15" fill="#33527c" opacity=".6"/>';
+    s += '<path d="M158 46 L108 32 M462 46 L512 32" stroke="#5c82b8" stroke-width="2" fill="none" opacity=".8"/>';
+
+    /* cloud columns: tallest at the eyewall, shorter further out */
+    function col(x, w, top, fill){
+      return '<rect x="'+x+'" y="'+top+'" width="'+w+'" height="'+(248-top)+'" rx="'+(w/2)+'" fill="'+fill+'"/>';
+    }
+    s += col(84,  50, 172, "#2b4468");   /* outer band */
+    s += col(478, 46, 166, "#2b4468");   /* outer band */
+    s += col(158, 62, 128, "#3a5c8c");   /* inner band */
+    s += col(400, 62, 128, "#3a5c8c");   /* inner band */
+    s += col(244, 46,  62, "#5d8ac4");   /* eyewall */
+    s += col(330, 46,  62, "#5d8ac4");   /* eyewall */
+
+    /* rising air in the eyewall, sinking air in the eye */
+    s += '<path d="M267 232 L267 88 M259 100 L267 82 L275 100" stroke="#eaf2fd" stroke-width="2.2" fill="none"/>';
+    s += '<path d="M353 232 L353 88 M345 100 L353 82 L361 100" stroke="#eaf2fd" stroke-width="2.2" fill="none"/>';
+    s += '<path d="M307 92 L307 224 M299 212 L307 230 L315 212" stroke="#f5b93f" stroke-width="2.2" fill="none"/>';
+
+    /* sea drawn last, so it sits in front of the cloud columns */
+    s += '<rect x="0" y="248" width="620" height="52" fill="#12508a"/>';
+    s += '<path d="M520 300 L520 248 L620 240 L620 300 Z" fill="#243a55"/>';   /* land */
+    s += '<path d="M430 249 Q478 206 526 249 Z" fill="#2a79c4"/>';             /* storm surge */
+    s += '<line x1="0" y1="248" x2="520" y2="248" stroke="#7fb2e8" stroke-width="1.6"/>';
+
+
+    s += '<text class="dtitle" x="12" y="22">Tropical cyclone — cross-section</text>';
+    s += '<text class="dlabel" x="12" y="276">Warm ocean, over 26.5°C</text>';
+    s += '<text class="dlabel" x="566" y="276">Coast</text>';
+
+    /* clickable hotspots */
+    s += '<rect class="hot" data-id="eye"   x="290" y="96"  width="36" height="140" rx="6"/>';
+    s += '<rect class="hot" data-id="wall"  x="242" y="66"  width="50" height="170" rx="6"/>';
+    s += '<rect class="hot" data-id="bands" x="154" y="132" width="70" height="108" rx="6"/>';
+    s += '<rect class="hot" data-id="surge" x="428" y="208" width="100" height="42" rx="6"/>';
+    return s + '</svg>';
+  },
+
+  /* Oceanic plate subducting beneath a continental plate. */
+  destructive: function(){
+    var s = '<svg viewBox="0 0 620 320" role="img" aria-label="Destructive plate boundary cross-section">';
+    s += '<rect width="620" height="320" fill="#0b1b30"/>';
+
+    /* mantle — deliberately a different colour family from the crust */
+    s += '<rect x="0" y="146" width="620" height="174" fill="#33223a"/>';
+    s += '<line x1="0" y1="146" x2="620" y2="146" stroke="#5a3b63" stroke-width="1"/>';
+
+    /* sea, filling the trench */
+    s += '<path d="M0 96 L250 96 L250 168 L234 156 L200 124 L0 124 Z" fill="#12508a"/>';
+    s += '<line x1="0" y1="96" x2="252" y2="96" stroke="#7fb2e8" stroke-width="1.6"/>';
+
+    /* subducting oceanic plate */
+    s += '<path d="M0 124 L200 124 L234 156 L306 212 L394 292 L372 310 L284 230 L212 172 L196 146 L0 146 Z" '+
+         'fill="#3d5a80" stroke="#7fa8dd" stroke-width="1.4"/>';
+
+    /* continental plate, rising above sea level */
+    s += '<path d="M250 168 L250 96 L272 78 L620 70 L620 168 Z" fill="#5b6784" stroke="#9db2d4" stroke-width="1.4"/>';
+
+    /* magma rising off the descending slab */
+    s += '<path d="M336 236 Q372 190 412 132" stroke="#ff7a5e" stroke-width="2.5" fill="none" stroke-dasharray="6 5"/>';
+    s += '<ellipse cx="420" cy="116" rx="28" ry="14" fill="#e2603f"/>';
+    s += '<rect x="416" y="34" width="8" height="72" fill="#e2603f"/>';
+
+    /* composite volcano, with strata */
+    s += '<path d="M372 74 L420 24 L468 74 Z" fill="#6d7f9c" stroke="#a8bcd8" stroke-width="1.3"/>';
+    s += '<path d="M390 55 L450 55 M382 64 L458 64" stroke="#8fa4c2" stroke-width="1"/>';
+    s += '<path d="M408 38 L420 22 L432 38 Z" fill="#ff9d6e"/>';
+
+    /* focus on the slab */
+    s += '<circle cx="340" cy="246" r="6.5" fill="#ffd166"/>';
+    s += '<circle cx="340" cy="246" r="14" fill="none" stroke="#ffd166" stroke-width="1.3" opacity=".55"/>';
+
+    /* plate movement */
+    s += '<path d="M34 110 L96 110 M86 104 L100 110 L86 116" stroke="#eaf2fd" stroke-width="2.2" fill="none"/>';
+    s += '<path d="M582 58 L520 58 M530 52 L516 58 L530 64" stroke="#eaf2fd" stroke-width="2.2" fill="none"/>';
+
+    s += '<text class="dlabel" x="12" y="90">Sea level</text>';
+    s += '<text class="dlabel" x="524" y="252">Mantle</text>';
+    s += '<text class="dtitle" x="12" y="22">Destructive boundary — cross-section</text>';
+
+    /* clickable hotspots */
+    s += '<rect class="hot" data-id="ocean"  x="60"  y="120" width="120" height="28" rx="6"/>';
+    s += '<rect class="hot" data-id="trench" x="204" y="102" width="54"  height="60" rx="6"/>';
+    s += '<rect class="hot" data-id="cont"   x="506" y="76"  width="96"  height="66" rx="6"/>';
+    s += '<rect class="hot" data-id="volc"   x="384" y="22"  width="72"  height="52" rx="6"/>';
+    s += '<rect class="hot" data-id="focus"  x="312" y="220" width="54"  height="52" rx="6"/>';
+    return s + '</svg>';
+  }
+};
+
+/* ============================================================================
+   10. THE FINALE
+   ============================================================================ */
+
+function openFinale(){
+  var bought = {};
+  var spent  = 0;
+  var budget = state.tokens;
+
+  openModal("Level 1 finale", FINALE.title);
+  var body = document.getElementById("mBody");
+
+  function totals(){
+    var t = { lives:0, econ:0, recov:0 };
+    FINALE.cats.forEach(function(c){
+      c.items.forEach(function(it){
+        if(bought[it.id]){ t.lives += it.lives; t.econ += it.econ; t.recov += it.recov; }
+      });
+    });
+    FINALE.synergies.forEach(function(s){
+      if(s.needs.every(function(id){ return bought[id]; })){ t.lives += s.lives; t.recov += s.recov; }
+    });
+    return t;
+  }
+
+  function draw(){
+    body.innerHTML = "";
+    body.insertAdjacentHTML("beforeend",
+      '<div class="brief"><h4>Your assignment</h4><p>'+esc(FINALE.brief)+'</p></div>');
+
+    var bar = el("div","budget",
+      '<div><div class="lab">Budget remaining</div><div class="amt">◈ '+(budget-spent)+'</div></div>'+
+      '<div style="margin-left:auto;text-align:right"><div class="lab">Committed</div>'+
+      '<div class="amt" style="color:var(--gold)">◈ '+spent+'</div></div>');
+    body.appendChild(bar);
+
+    FINALE.cats.forEach(function(c){
+      var cat = el("div","cat", '<h4>'+esc(c.name)+'</h4><div class="cd">'+esc(c.desc)+'</div>');
+      c.items.forEach(function(it){
+        var on   = !!bought[it.id];
+        var poor = !on && it.cost > (budget - spent);
+        var b = el("button","buy"+(on?" on":""),
+          '<div><div class="bn">'+esc(it.n)+'</div><div class="bd">'+esc(it.d)+'</div></div>'+
+          '<div class="cost">◈ '+it.cost+'</div>');
+        b.disabled = poor;
+        b.addEventListener("click", function(){
+          if(bought[it.id]){ delete bought[it.id]; spent -= it.cost; }
+          else if(it.cost <= budget - spent){ bought[it.id] = true; spent += it.cost; }
+          draw();
+        });
+        cat.appendChild(b);
+      });
+      body.appendChild(cat);
+    });
+
+    foot([ { label:"Back to the map", fn:closeModal, ghost:true }, null,
+           { label:"Commit the plan", primary:true, disabled:spent === 0,
+             fn:function(){ resolve(bought, spent, budget); } } ]);
+  }
+
+  draw();
+}
+
+function resolve(bought, spent, budget){
+  var t = { lives:0, econ:0, recov:0 };
+  var chosen = [];
+  FINALE.cats.forEach(function(c){
+    c.items.forEach(function(it){
+      if(bought[it.id]){
+        t.lives += it.lives; t.econ += it.econ; t.recov += it.recov;
+        chosen.push({ cat:c.name, item:it });
+      }
+    });
+  });
+
+  var fired = [];
+  FINALE.synergies.forEach(function(s){
+    if(s.needs.every(function(id){ return bought[id]; })){
+      t.lives += s.lives; t.recov += s.recov; fired.push(s);
+    }
+  });
+
+  /* maxima, so the simulated outcome scales sensibly */
+  var MAX = { lives:135, econ:79, recov:67 };
+  var lp = Math.min(1, t.lives / MAX.lives);
+  var ep = Math.min(1, t.econ  / MAX.econ);
+  var rp = Math.min(1, t.recov / MAX.recov);
+
+  var deaths   = Math.max(20, Math.round(2400 * (1 - lp) / 10) * 10);
+  var loss     = Math.max(1.2, Math.round((11 - 9 * ep) * 10) / 10);
+  var recovery = Math.max(8, Math.round(64 - 50 * rp));
+
+  var tier, medal, tagline;
+  if(lp >= 0.72)      { tier = "Gold — a model response"; medal = "🥇";
+                        tagline = "Independent reviewers describe the region as one of the best-prepared in the world."; }
+  else if(lp >= 0.48) { tier = "Silver — a solid plan"; medal = "🥈";
+                        tagline = "The region coped, but clear gaps in the plan cost lives that better allocation would have saved."; }
+  else if(lp >= 0.25) { tier = "Bronze — partial protection"; medal = "🥉";
+                        tagline = "Some measures worked, but the response was overwhelmed in the worst-affected districts."; }
+  else                { tier = "The plan failed"; medal = "⚠️";
+                        tagline = "Too little was in place. This is what a hazard becoming a disaster looks like."; }
+
+  var gaps = FINALE.gaps.filter(function(g){ return g.when(bought); });
+
+  var html = '<div class="outcome"><div class="medal">'+medal+'</div><h2>'+esc(tier)+'</h2>'+
+             '<div class="tag">'+esc(tagline)+'</div></div>';
+
+  html += '<div class="stats">'+
+    '<div class="stat"><div class="v" style="color:var(--bad)">'+deaths.toLocaleString()+'</div><div class="l">Deaths</div></div>'+
+    '<div class="stat"><div class="v" style="color:var(--gold)">$'+loss+'bn</div><div class="l">Economic loss</div></div>'+
+    '<div class="stat"><div class="v" style="color:var(--tok)">'+recovery+'</div><div class="l">Months to recover</div></div>'+
+    '</div>';
+
+  html += '<div class="debrief">';
+  html += '<h4>What your budget bought</h4><ul>';
+  if(!chosen.length) html += '<li>Nothing was funded, so the region faced the earthquake entirely unprepared.</li>';
+  chosen.forEach(function(c){
+    html += '<li><b>'+esc(c.item.n)+'</b> <span style="color:var(--dim)">('+esc(c.cat)+', ◈ '+c.item.cost+')</span> — '+esc(c.item.d)+'</li>';
+  });
+  html += '</ul>';
+
+  if(fired.length){
+    html += '<h4>Choices that worked together</h4><ul>';
+    fired.forEach(function(s){ html += '<li>'+esc(s.note)+'</li>'; });
+    html += '</ul>';
+  }
+
+  if(gaps.length){
+    html += '<h4>What your plan left exposed</h4><ul>';
+    gaps.forEach(function(g){ html += '<li>'+esc(g.text)+'</li>'; });
+    html += '</ul>';
+  }
+
+  var left = budget - spent;
+  html += '<h4>The examiner’s note</h4><ul>'+
+          '<li>You committed <b>◈ '+spent+'</b> of <b>◈ '+budget+'</b>'+
+          (left > 0 ? ', leaving ◈ '+left+' unspent. Unspent resources protect nobody — but nor does spreading a budget so thinly that nothing is finished.' : ', spending everything available.')+'</li>'+
+          '<li>Notice the pattern: <b>protection and preparation saved the most lives</b>, while prediction on its own bought very little. '+
+          'That is the argument to make in an exam answer about managing tectonic hazards.</li>'+
+          '<li>Every real government faces this trade-off. Chile spent decades on building codes and lost around 525 people to a magnitude 8.8 earthquake. '+
+          'Nepal could not afford to, and lost around 8,900 to a magnitude 7.8.</li>'+
+          '</ul></div>';
+
+  document.getElementById("mBody").innerHTML = html;
+  document.getElementById("mProg").textContent = "";
+
+  state.finaleDone = true;
+  state.finaleResult = { tier:tier, deaths:deaths, loss:loss, recovery:recovery };
+  save();
+
+  foot([ { label:"Try a different plan", ghost:true, fn:openFinale }, null,
+         { label:"Back to the map", primary:true, fn:closeModal } ]);
+}
+
+/* ============================================================================
+   11. BOOT
+   ============================================================================ */
+
+document.getElementById("cellsToggle").addEventListener("change", function(e){
+  var layer = document.getElementById("cellLayer");
+  if(layer) layer.style.display = e.target.checked ? "" : "none";
+});
+
+document.getElementById("resetBtn").addEventListener("click", function(){
+  if(!confirm("Wipe all progress and start Level 1 again?")) return;
+  state = { tokens:0, done:{}, finaleDone:false, finaleResult:null };
+  save();
+  renderAll();
+  document.getElementById("cellsToggle").checked = false;
+});
+
+load();
+renderAll();
+
+</script>
+</body>
+</html>
