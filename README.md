@@ -2,9 +2,10 @@
 
 A revision game for **Edexcel GCSE Geography B (Investigating Geographical Issues)**.
 
-You fly around a real world map, land on genuine case-study locations, complete
-challenges to earn **tokens**, then spend those tokens as a hazard-management
-budget in the level finale.
+Revision is split into two separate halves: the **topics** of the specification,
+tested as concepts, and four **case studies** pinned on a real world map, learnt
+in two linked pairs. Completing challenges earns **tokens**, which you then spend
+as a hazard-management budget in the level finale.
 
 **Level 1 — Hazardous Earth** (Component 1, Topic 1) is fully playable.
 
@@ -15,33 +16,79 @@ internet connection required. It is a single self-contained file.
 
 ## How it works
 
-**Eight case-study sites**, each pinned at its true latitude and longitude:
+### Topics and case studies are separate
 
-| Site | Case study | Spec content |
+**Topics** cover the specification content as concepts. Named places appear only
+as illustration — there is no case study to memorise here, just the geography.
+
+| Topic | What it covers | Qs |
 |---|---|---|
-| Tacloban, Philippines | Typhoon Haiyan, 2013 | Cyclone formation, structure, hazards |
-| New Jersey & New York | Hurricane Sandy, 2012 | Developed/developing impact contrast |
-| Gorkha, Nepal | Nepal earthquake, 2015 | Collision boundary, low-income country |
-| Maule, Chile | Chile earthquake, 2010 | Destructive boundary, development contrast |
-| Eyjafjallajökull, Iceland | Ash cloud, 2010 | Constructive boundary, volcano types |
-| San Andreas, California | Managing tectonic risk | Conservative boundary, the four Ps |
-| Vostok, Antarctica | Ice core record | Natural climate change and its evidence |
-| Equatorial Atlantic | The ITCZ | Global atmospheric circulation |
+| 1.1 Global atmospheric circulation | Cells, pressure belts, winds, world climate zones | 5 |
+| 1.2 Natural climate change | Quaternary fluctuations, the evidence, the natural causes | 5 |
+| 1.3 Tropical cyclones: formation and structure | Conditions, Coriolis, anatomy, Saffir–Simpson | 6 |
+| 1.4 Hazards, vulnerability and responses | How a hazard becomes a disaster; the exam vocabulary | 4 |
+| 1.5 Earth's structure and plate boundaries | Inside the Earth; the four boundary types | 6 |
+| 1.6 Tectonic hazards and their effects | Earthquakes, volcanoes, secondary hazards | 6 |
+| 1.7 Managing tectonic hazards | The four Ps, and which of them saves lives | 4 |
 
-The map also draws the **plate boundaries**, colour-coded by type, and can
-overlay the **atmospheric circulation cells** — so the map itself is revision.
+**Case studies** are their own section, and they come in **two linked pairs**.
+Each pair contrasts a high-income country with a poorer one, and each unlocks a
+comparison round once you have studied both halves:
+
+| Pair | Case studies | Comparison |
+|---|---|---|
+| Tectonic | Tōhoku, Japan — earthquake and tsunami, 2011 (5 Qs)<br>Gorkha, Nepal — earthquake, 2015 (5 Qs) | **Japan vs Nepal** (4 Qs) |
+| Tropical cyclone | New Orleans, USA — Hurricane Ida, 2021 (5 Qs)<br>Tacloban, Philippines — Typhoon Haiyan, 2013 (5 Qs) | **Ida vs Haiyan** (4 Qs) |
+
+The comparison is where the pairing earns its keep. It is not a recap — it asks
+the questions you can only ask once you hold both studies in your head: why
+Nepal's $5 billion hurt more than Japan's $235 billion, why a city whose levees
+held still lost around 30 people to a power cut, and what each pair proves about
+the limits of development as an explanation.
+
+Ida and Haiyan are the only two tropical cyclones named anywhere in the game.
+No other storm is used for comparison, so everything you are asked about a
+hurricane is answerable from these two case studies alone.
+
+The map pins the four case studies at their true coordinates, colour-coded by
+pair, and still draws the plate boundaries by type and overlays the atmospheric
+circulation cells. Click a pin to open that case study.
 
 **Six challenge formats**, so it never becomes one long multiple-choice test:
 multiple choice, sequencing, matching pairs, labelling a diagram, data response,
-and a written exam question you mark yourself against the real mark scheme.
+and written exam questions you mark yourself.
+
+### The long-form questions
+
+There are 4-mark and 8-mark questions only, matching the paper, and each is
+marked the way Edexcel B marks it.
+
+**4-mark questions are point-marked, and the reason is where the second mark
+lives.** Every creditable answer in the scheme is split into a point and the
+reason that develops it. The reason cannot be ticked until you have claimed the
+point it belongs to, and withdrawing a point takes its development mark with it —
+because a statement without a reason scores 1 mark, not 2. A running total shows
+what you have earned, capped at two developed reasons:
+
+```
+☑ 1  Air rises at the equator, creating a belt of low pressure
+  ☑ 1  because intense insolation heats the surface, and as the air rises it
+        cools and its water vapour condenses, giving the heavy convectional
+        rainfall that supports tropical rainforest
+```
+
+**8-mark questions are levels-based.** You get indicative content for reference,
+then place your whole answer in Level 1, 2 or 3 against the real descriptors and
+award yourself a mark inside that band. An answer with no supported judgement
+cannot reach Level 3, however much it knows.
 
 **Tokens.** Every challenge is worth ◈ 3. Each hint or mistake costs one. You
-always get the full explanation afterwards, right or wrong. Reach ◈ 60 and the
+always get the full explanation afterwards, right or wrong. Reach ◈ 90 and the
 finale unlocks.
 
 **The finale.** You advise a government on tectonic risk and spend your tokens
 across prediction, preparation, protection and planning. Buying everything costs
-◈ 156 and a perfect run earns ◈ 126 — so you cannot have it all. The game then
+◈ 234 and a perfect run earns ◈ 192 — so you cannot have it all. The game then
 simulates the earthquake and reports deaths, economic loss and recovery time,
 with a debrief explaining which choices worked, which combinations reinforced
 each other, and what your plan left exposed.
@@ -53,8 +100,38 @@ Progress saves automatically in your browser. **Reset** wipes it.
 All content lives in one place near the top of `index.html`, under
 `2. GAME CONTENT`. You never need to touch the engine code below it.
 
-Each site is an object in the `SITES` array. Add a question by dropping another
-object into that site's `qs` array:
+There are two arrays, matching the two halves of the game.
+
+`TOPICS` holds the concept revision:
+
+```js
+{ id:"cyclones", ref:"1.3", name:"Tropical cyclones: formation and structure",
+  theme:"One line shown on the topic card",
+  brief:"The paragraph shown before the first challenge.",
+  keys:["Chips","Shown","Under","The brief"],
+  qs:[ /* … */ ] }
+```
+
+`PAIRS` holds the case studies. Each pair has exactly two `studies` and one
+`compare`, which stays locked until both studies have been done:
+
+```js
+{ id:"tectonic", name:"Tectonic pair", colour:"#b98cff",
+  sub:"One line shown under the pair title",
+  studies:[
+    { id:"tohoku", short:"Tōhoku",          // `short` is the map pin label
+      name:"Tōhoku, Japan", sub:"Earthquake and tsunami, 2011",
+      lon:142.40, lat:38.30,                // real coordinates place the pin
+      brief:"…", facts:["11 March 2011","Magnitude 9.0"],
+      qs:[ /* … */ ] },
+    { /* the second study */ }
+  ],
+  compare:{ id:"cmp-tectonic", name:"Japan vs Nepal",
+            brief:"…", qs:[ /* … */ ] } }
+```
+
+Add a question by dropping another object into any `qs` array — topics, studies
+and comparisons all use the same question formats:
 
 ```js
 { t:"mcq",
@@ -71,21 +148,41 @@ The other formats:
 - `{ t:"label", q, diagram:"cyclone"|"destructive", targets:[{id, prompt}] }` —
   `id` must match a `data-id` on a hotspot in that diagram (see `9. DIAGRAMS`).
 - `{ t:"data", chart:{...}, q, opts, a }` — `chart.kind` is `"bars"`, `"table"` or `"line"`.
-- `{ t:"exam", q, marks, scheme:[...] }` — one credit point per array entry.
+- `{ t:"exam", marks:4, q, guidance, scheme:[{p, r}, ...] }` — point-marked.
+  `p` is the point (1 mark), `r` is the reason that develops it (1 further mark).
+  Write `r` as a continuation beginning "because", "so" or "which" — it is shown
+  as the second half of the same sentence, and it is what the second mark is for.
+- `{ t:"exam", marks:8, q, guidance, indicative:[...], levels:[{band, lo, hi, d}] }` —
+  levels-based. The three bands must tile 1–8 with no gap or overlap.
 
 Every question needs a `why`. That explanation is the point of the game.
 
-To move or add a map pin, set `lon` and `lat` to the real coordinates — the
+To move a map pin, change `lon` and `lat` to the real coordinates — the
 projection places it automatically.
 
 ## Levels 2–9
 
 The level rail shows all nine topics of the specification. Only Level 1 is built.
-The remaining eight follow the same structure: pick real locations, write the
-questions, and add a finale that spends tokens on a decision relevant to that topic.
+The remaining eight follow the same structure: split the level into its
+specification sub-topics for `TOPICS`, choose linked pairs of contrasting case
+studies for `PAIRS`, and add a finale that spends tokens on a decision relevant
+to that level.
 
 ## Accuracy
 
 Figures are the ones commonly quoted at GCSE and are rounded (`~6,300 deaths`,
-`~$12 billion`). Sources vary, particularly on economic damage. Check anything
-you plan to quote in an exam against your own notes and the current specification.
+`~$12 billion`). Sources vary, particularly on economic damage. Two worth
+knowing about:
+
+- **Japan's death toll** is usually given as around 15,900 confirmed plus 2,500
+  still missing, hence "~18,500".
+- **Ida's death toll** depends on where you draw the boundary. Around 30 died in
+  Louisiana, most of them indirectly, and around 50 more when the remnants
+  flooded New York and New Jersey days later. Totals of "around 90" or higher
+  circulate because they count the whole track. The game keeps Louisiana and the
+  north-east separate, because the distinction is the interesting part.
+- **The $14.5 billion figure** is the cost of the levee, floodwall and surge
+  barrier system that rings New Orleans, which held against Ida's surge.
+
+Check anything you plan to quote in an exam against your own notes and the
+current specification.
