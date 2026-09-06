@@ -6,26 +6,40 @@
 <title>Hazardous Earth — GCSE Geography Expedition</title>
 <style>
 /* ============================================================
-   THEME
+   THEME — the palette is the Earth in cross-section:
+   upper atmosphere, storm band, surface, crust, mantle.
    ============================================================ */
 :root{
-  --bg:#0a1020;
-  --bg-2:#0e1729;
-  --panel:#131f36;
-  --panel-2:#18273f;
-  --line:#26395a;
-  --ink:#e9eff8;
-  --muted:#93a6c4;
-  --dim:#6b7f9e;
-  --tok:#3ad4bb;
-  --gold:#f5b93f;
-  --bad:#ff6f5e;
-  --good:#4fdc95;
-  --ocean:#081426;
-  --c-constructive:#4fdc95;
-  --c-destructive:#ff7a5e;
-  --c-conservative:#ffd166;
-  --c-collision:#b98cff;
+  --ink:#120826;
+  --void:#1b0f38;
+
+  --sky-1:#3a1f7d;      /* upper atmosphere */
+  --sky-2:#5b3fd6;      /* mid sky          */
+  --sky-3:#7d5eea;      /* lower sky        */
+  --cyan:#3fd3ef;       /* storm band       */
+  --cloud:#efe6ff;
+
+  --grass:#57cc4a;
+  --grass-2:#2f8f36;
+  --soil:#8a4b2c;
+  --rock:#5c3320;
+  --rock-2:#3a1f13;
+  --mantle:#c8391c;
+  --magma:#ff9a2e;
+
+  --gold:#ffc63c;
+  --tok:#2ee6c2;
+  --good:#3fd97f;
+  --bad:#ff5a4a;
+
+  --chrome:#cfcbe0;     /* window face */
+  --chrome-hi:#ffffff;
+  --chrome-lo:#8a86a3;
+  --paper:#f6f2ff;
+
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+
   --shadow:0 18px 50px rgba(0,0,0,.55);
   --r:14px;
 }
@@ -33,173 +47,205 @@
 html,body{height:100%}
 body{
   margin:0;
-  background:
-    radial-gradient(1200px 700px at 70% -10%, #16264400, #0a1020 70%),
-    var(--bg);
-  color:var(--ink);
-  font:15px/1.55 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--ink);
+  background-image:
+    radial-gradient(900px 500px at 78% -12%, rgba(91,63,214,.55), transparent 70%),
+    radial-gradient(700px 420px at 8% 108%, rgba(200,57,28,.28), transparent 70%);
+  color:#eee7ff;
+  font:15px/1.55 var(--sans);
   -webkit-font-smoothing:antialiased;
 }
 h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.015em}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-.wrap{max-width:1180px;margin:0 auto;padding:20px 20px 60px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 56px}
 
 /* ============================================================
-   HEADER / HUD
+   THE WINDOW — the whole game sits in one chunky desktop window,
+   with the nine specification topics as its folder tabs.
    ============================================================ */
-.hud{
-  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
-  padding:14px 18px;margin-bottom:18px;
-  background:linear-gradient(180deg,var(--panel),var(--bg-2));
-  border:1px solid var(--line);border-radius:var(--r);
-  box-shadow:var(--shadow);
+.tabs{display:flex;gap:3px;overflow-x:auto;padding:0 6px;scrollbar-width:thin}
+.tab{
+  flex:0 0 auto;position:relative;top:3px;
+  padding:7px 12px 9px;background:#2a1c50;color:#8f83bd;
+  border:3px solid var(--ink);border-bottom:0;
+  font:600 11.5px/1.2 var(--mono);letter-spacing:.02em;white-space:nowrap;
 }
-.brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
-.brand h1{font-size:17px}
-.brand .sub{font-size:12px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
-.tokens{
-  display:flex;align-items:center;gap:9px;
-  padding:8px 14px;border-radius:999px;
-  background:rgba(58,212,187,.10);border:1px solid rgba(58,212,187,.35);
-  color:var(--tok);font-weight:650;font-variant-numeric:tabular-nums;
+.tab .n{color:#6f63a0;margin-right:6px}
+.tab.live{
+  top:0;background:var(--chrome);color:var(--ink);padding-bottom:12px;
+  box-shadow:inset 3px 3px 0 var(--chrome-hi);
 }
-.tokens .gem{font-size:15px}
-.tokens .n{font-size:18px}
-.hud .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.35}
-.btn{
-  padding:9px 16px;border-radius:10px;border:1px solid var(--line);
-  background:var(--panel-2);font-weight:550;transition:.15s;
+.tab.live .n{color:#6a4fd8}
+.tab.locked{cursor:not-allowed}
+
+.win{
+  background:var(--chrome);
+  border:3px solid var(--ink);
+  box-shadow:10px 10px 0 rgba(10,4,24,.55);
 }
-.btn:hover{background:#213353;border-color:#38537f}
-.btn.primary{background:var(--tok);color:#062b25;border-color:transparent}
-.btn.primary:hover{background:#4ee6cd}
-.btn.ghost{background:none}
-.btn:disabled{opacity:.4;cursor:not-allowed}
+.titlebar{
+  display:flex;align-items:center;gap:12px;
+  padding:7px 8px 7px 12px;
+  background:linear-gradient(90deg,#6a4fd8,#b34fd8 60%,#3fd3ef);
+  border-bottom:3px solid var(--ink);
+  color:#fff;
+}
+.titlebar .tt{font:700 14px/1 var(--mono);letter-spacing:.14em;text-shadow:2px 2px 0 rgba(18,8,38,.55)}
+.titlebar .tsub{font:11.5px/1 var(--mono);color:rgba(255,255,255,.82);margin-right:auto}
+.winbtn{
+  width:26px;height:22px;background:var(--chrome);border:2px solid var(--ink);
+  box-shadow:inset -2px -2px 0 var(--chrome-lo),inset 2px 2px 0 var(--chrome-hi);
+  color:var(--ink);font:700 12px/1 var(--mono);display:grid;place-items:center;
+}
+.winbtn:hover{background:#e6e2f5}
+.winbtn:active{box-shadow:inset 2px 2px 0 var(--chrome-lo)}
+
+/* ---- status strip ---- */
+.status{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:9px 12px;border-bottom:3px solid var(--ink);
+  background:#bdb8d4;font:12px/1.3 var(--mono);color:#2a1f4d;
+}
+.gauge{
+  display:flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--ink);border:2px solid #000;color:var(--gold);
+  box-shadow:inset -2px -2px 0 rgba(255,255,255,.12);
+}
+.gauge .gem{font-size:14px}
+.gauge .n{font:700 17px/1 var(--mono);font-variant-numeric:tabular-nums;color:#fff}
+.status .counts{display:flex;gap:14px;flex-wrap:wrap}
+.status .counts b{font-weight:700}
+.status .note{margin-left:auto;padding:5px 10px;background:#a9a3c6;border:2px solid var(--ink)}
+.status .note.ready{background:var(--gold);color:#3b2600}
 
 /* ============================================================
-   LEVEL RAIL
+   THE COURSE — a scrolling cross-section of the hazardous Earth
    ============================================================ */
-.rail{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:14px}
-.lvl{
-  flex:0 0 auto;min-width:150px;padding:10px 13px;border-radius:11px;
-  background:var(--panel);border:1px solid var(--line);opacity:.5;
+.stage{
+  position:relative;overflow:hidden;
+  border-bottom:3px solid var(--ink);
+  background:#2a1a55;touch-action:pan-y;
 }
-.lvl .no{font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
-.lvl .nm{font-size:13px;font-weight:600;margin-top:3px}
-.lvl.active{opacity:1;border-color:var(--tok);background:linear-gradient(180deg,#173a3a,#132437)}
-.lvl.active .no{color:var(--tok)}
-.lvl.done{opacity:1;border-color:var(--good)}
+canvas#world{
+  display:block;width:100%;height:448px;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+}
+.stage:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+
+/* depth ruler — height on screen is altitude, so say so */
+.ruler{position:absolute;left:0;top:0;bottom:0;width:104px;pointer-events:none}
+.ruler span{
+  position:absolute;left:6px;transform:translateY(-50%);
+  padding:2px 6px;background:rgba(18,8,38,.66);
+  font:600 9.5px/1.4 var(--mono);letter-spacing:.14em;color:rgba(255,255,255,.62);
+}
+
+/* signposts, positioned over the world in world coordinates */
+.markers{position:absolute;inset:0;pointer-events:none}
+.mark{
+  position:absolute;pointer-events:auto;transform:translate(-50%,-100%);
+  min-width:104px;max-width:190px;padding:5px 8px 6px;text-align:left;
+  background:var(--chrome);border:3px solid var(--ink);
+  box-shadow:inset -2px -2px 0 var(--chrome-lo),inset 2px 2px 0 var(--chrome-hi),0 4px 0 rgba(18,8,38,.5);
+  transition:transform .08s steps(2);
+}
+.mark .r{display:block;font:700 10px/1.3 var(--mono);color:#6a4fd8;letter-spacing:.08em}
+.mark .l{display:block;font:600 12px/1.25 var(--sans);color:var(--ink);margin-top:1px}
+.mark .s{display:block;font:10.5px/1.3 var(--mono);color:#5c5480;margin-top:3px}
+.mark:hover{transform:translate(-50%,-100%) translateY(-3px)}
+.mark.done{background:#d6f5e0;border-color:#0d4f2c}
+.mark.done .r{color:#0d7a44}
+.mark.done .s{color:#0d7a44}
+.mark.near{background:var(--gold);border-color:#5a3c00}
+.mark.near .r,.mark.near .s{color:#6b4a00}
+.mark.locked{background:#a49ec2;cursor:not-allowed;box-shadow:none;opacity:.9}
+.mark.locked .l{color:#3b3358}
+.mark.locked .r{color:#4b4270}
+.mark[data-kind="finale"]{min-width:132px}
+.mark .pip{display:inline-block;width:8px;height:8px;margin-right:5px;background:var(--pair);vertical-align:1px}
+
+/* ---- controls ---- */
+.ctrl{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 12px;background:#bdb8d4;border-bottom:3px solid var(--ink);
+  font:11.5px/1.5 var(--mono);color:#3a3060;
+}
+.ctrl kbd{
+  display:inline-block;min-width:20px;padding:1px 5px;margin:0 1px;text-align:center;
+  background:var(--chrome);border:2px solid var(--ink);
+  box-shadow:inset -2px -2px 0 var(--chrome-lo),inset 2px 2px 0 var(--chrome-hi);
+  font:700 11px/1.4 var(--mono);color:var(--ink);
+}
+.ctrl .sp{margin-left:auto}
+.pad{position:absolute;left:10px;bottom:10px;display:none;gap:8px}
+.pad button{
+  width:56px;height:56px;background:rgba(207,203,224,.92);border:3px solid var(--ink);
+  box-shadow:inset -3px -3px 0 var(--chrome-lo),inset 3px 3px 0 var(--chrome-hi);
+  color:var(--ink);font:700 20px/1 var(--mono);
+}
+.pad button:active{box-shadow:inset 3px 3px 0 var(--chrome-lo)}
+body.touch .pad{display:flex}
 
 /* ============================================================
-   MAP
+   COURSE INDEX — every stop in specification order, as a list
+   that works without the platformer
    ============================================================ */
-.mapcard{
-  background:linear-gradient(180deg,#0c1730,#0a1224);
-  border:1px solid var(--line);border-radius:var(--r);
-  padding:14px;box-shadow:var(--shadow);position:relative;
+.index{padding:16px 14px 4px;background:var(--chrome);color:var(--ink)}
+.idxhead{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  margin:14px 0 4px;padding-bottom:5px;border-bottom:3px solid var(--ink);
 }
-.maptop{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
-.maptop h2{font-size:15px;margin-right:auto}
-.key{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
-.key i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
-.toggle{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
-svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#081426;touch-action:manipulation}
-.land{fill:#1b2c46;stroke:#33507a;stroke-width:.8}
-.ice{fill:#22354f;stroke:#3b5b86;stroke-width:.8}
-.boundary{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
-.cellband{fill:#3ad4bb;opacity:.05}
-.cellline{stroke:#3ad4bb;stroke-width:.6;opacity:.3;stroke-dasharray:4 5}
-.celltext{fill:#5f7ea3;font-size:8px;letter-spacing:.12em}
-.pin{cursor:pointer}
-.pin .halo{fill:var(--pair,var(--gold));opacity:.16}
-.pin .dot{fill:var(--pair,var(--gold));stroke:#0a1020;stroke-width:1.6}
-.pin.done .dot{fill:var(--good)}
-.pin.done .halo{fill:var(--good);opacity:.14}
-.pin .lbl{fill:#cfe0f5;font-size:8.5px;font-weight:600;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#0a1020;stroke-width:2.6;stroke-linejoin:round}
-.pin:hover .halo{opacity:.34}
-.pin .ring{fill:none;stroke:var(--pair,var(--gold));stroke-width:1.1;opacity:.55}
-.pin.done .ring{stroke:var(--good)}
-
-/* ============================================================
-   TOPIC LIST
-   ============================================================ */
-.maphint{margin:10px 0 0;font-size:12px;color:var(--dim)}
-.listtop{display:flex;align-items:baseline;gap:12px;margin-top:24px;flex-wrap:wrap}
-.listtop h3{margin:0;font-size:14px;letter-spacing:.02em}
-.listtop .sublabel{font-size:12px;color:var(--dim)}
-
-/* ---- case-study pairs ---- */
-.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-top:10px}
-.pair{
-  padding:14px;border-radius:14px;background:var(--panel);
-  border:1px solid var(--line);border-top:2px solid var(--pair);
+.idxhead:first-child{margin-top:0}
+.idxhead h3{font:700 12px/1 var(--mono);letter-spacing:.12em}
+.idxhead .sub{font:12px/1.4 var(--sans);color:#5c5480}
+.row{
+  display:flex;width:100%;align-items:center;gap:12px;text-align:left;
+  padding:9px 10px;border-bottom:1px solid #b4aecf;
+  border-left:5px solid transparent;
 }
-.pairhead{margin-bottom:11px}
-.pairhead .pl{display:flex;align-items:center;gap:7px;font-weight:650;font-size:13.5px}
-.pairhead .pl i{width:9px;height:9px;border-radius:99px;background:var(--pair);flex:none}
-.pairhead .pn{font-size:12.5px;color:var(--muted);margin-top:3px}
-.pairrow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.cs{
-  text-align:left;padding:11px 13px;border-radius:11px;
-  background:var(--panel-2);border:1px solid var(--line);transition:.15s;
-}
-.cs:hover{border-color:var(--pair);transform:translateY(-1px)}
-.cs .st{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
-.cs .sn{font-weight:650;margin:3px 0 5px;font-size:13.5px}
-.cs .sc{font-size:11.5px;color:var(--tok);font-weight:600}
-.cs.done{border-color:rgba(79,220,149,.45)}
-.cs.done .sc{color:var(--good)}
-/* the comparison, which links the pair */
-.cmp{
-  display:block;width:100%;text-align:left;margin-top:9px;padding:10px 13px;border-radius:11px;
-  background:linear-gradient(90deg,color-mix(in srgb,var(--pair) 13%,transparent),transparent);
-  border:1px solid var(--pair);transition:.15s;position:relative;
-}
-.cmp::before{
-  content:"";position:absolute;left:50%;top:-9px;width:1px;height:9px;background:var(--pair);opacity:.6;
-}
-.cmp:hover:not(.locked){transform:translateY(-1px)}
-.cmp .ct{font-weight:650;font-size:13px;color:var(--pair)}
-.cmp .cd{font-size:11.5px;color:var(--muted);margin-top:2px}
-.cmp.locked{
-  background:none;border-style:dashed;border-color:var(--line);cursor:not-allowed;opacity:.75;
-}
-.cmp.locked .ct{color:var(--dim)}
-.cmp.done{border-color:rgba(79,220,149,.55)}
-.cmp.done .cd{color:var(--good)}
-.linknote{
-  margin:0 0 12px;padding:9px 12px;border-radius:10px;font-size:12.5px;color:var(--muted);
-  background:#0e1a2e;border:1px solid var(--line);
-}
-.linknote b{color:var(--ink)}
-.sites{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:10px}
-.site{
-  text-align:left;padding:13px 15px;border-radius:12px;
-  background:var(--panel);border:1px solid var(--line);transition:.15s;
-}
-.site:hover{border-color:#3f5f8f;transform:translateY(-1px)}
-.site .st{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
-.site .sn{font-weight:650;margin:3px 0 4px}
-.site .sd{font-size:12.5px;color:var(--muted)}
-.site .sc{margin-top:8px;font-size:11.5px;color:var(--tok);font-weight:600}
-.site.done{border-color:rgba(79,220,149,.45)}
-.site.done .sc{color:var(--good)}
-.key i.rd{border-radius:99px;width:9px;height:9px}
+.row:hover:not(:disabled){background:#e2ddf2;border-left-color:#6a4fd8}
+.row.done{border-left-color:var(--grass-2)}
+.row.done:hover{border-left-color:var(--grass-2)}
+.row .ref{flex:0 0 40px;font:700 12px/1 var(--mono);color:#6a4fd8;font-variant-numeric:tabular-nums}
+.row .nm{flex:1 1 auto;min-width:0}
+.row .nm b{display:block;font:600 14px/1.3 var(--sans)}
+.row .nm i{display:block;font:normal 12.5px/1.4 var(--sans);color:#5c5480;margin-top:1px}
+.row .st{flex:0 0 auto;font:11.5px/1 var(--mono);color:#5c5480;text-align:right;white-space:nowrap}
+.row.done .st{color:#0d7a44;font-weight:700}
+.row:disabled{opacity:.55;cursor:not-allowed}
+.row .pip{flex:0 0 10px;height:10px;background:var(--pair)}
+.row .locked{color:#6b628f}
 
 /* ============================================================
    FINALE CARD
    ============================================================ */
 .finale{
-  margin-top:16px;padding:18px 20px;border-radius:var(--r);
-  border:1px dashed var(--line);background:var(--bg-2);
+  margin:0;padding:16px 14px 18px;background:#bdb8d4;
+  border-top:3px solid var(--ink);color:var(--ink);
   display:flex;align-items:center;gap:18px;flex-wrap:wrap;
 }
-.finale.ready{border:1px solid var(--gold);background:linear-gradient(180deg,#2a2210,#131c2e)}
-.finale .ft{margin-right:auto}
-.finale h3{font-size:15px}
-.finale p{margin:5px 0 0;font-size:13px;color:var(--muted);max-width:62ch}
-.bar{height:6px;border-radius:99px;background:#1d2c46;overflow:hidden;margin-top:9px;max-width:320px}
-.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--tok),var(--gold));transition:width .4s}
+.finale.ready{background:linear-gradient(90deg,var(--gold),#ffa93c)}
+.finale .ft{margin-right:auto;flex:1 1 340px}
+.finale h3{font:700 13px/1.3 var(--mono);letter-spacing:.08em}
+.finale p{margin:6px 0 0;font:13px/1.55 var(--sans);color:#3a3060;max-width:62ch}
+.finale.ready p{color:#4a3200}
+.bar{height:14px;background:var(--ink);border:2px solid #000;margin-top:10px;max-width:340px;padding:2px}
+.bar>i{display:block;height:100%;background:var(--tok);transition:width .4s steps(12)}
+.finale.ready .bar>i{background:var(--good)}
+
+/* the one button that starts the finale */
+.btn{
+  padding:9px 16px;background:var(--chrome);border:3px solid var(--ink);
+  box-shadow:inset -3px -3px 0 var(--chrome-lo),inset 3px 3px 0 var(--chrome-hi);
+  font:600 13px/1.3 var(--sans);color:var(--ink);
+}
+.btn:hover:not(:disabled){background:#e2ddf2}
+.btn:active:not(:disabled){box-shadow:inset 3px 3px 0 var(--chrome-lo)}
+.btn.primary{background:var(--tok);color:#04322a}
+.btn.primary:hover:not(:disabled){background:#5cf2d6}
+.btn.ghost{background:transparent;box-shadow:none;border-color:rgba(18,8,38,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 
 /* ============================================================
    MODAL
@@ -222,7 +268,7 @@ svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#0814
 .mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;background:var(--panel)}
 .mfoot .sp{margin-left:auto}
 .x{font-size:20px;color:var(--dim);line-height:1;padding:4px 8px;border-radius:8px}
-.x:hover{color:var(--ink);background:#22334f}
+.x:hover{color:var(--ink);background:var(--edge-soft)}
 
 .qtype{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
 .qtext{font-size:16.5px;font-weight:600;line-height:1.45;margin-bottom:14px}
@@ -231,7 +277,7 @@ svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#0814
   text-align:left;padding:12px 15px;border-radius:11px;
   background:var(--panel);border:1px solid var(--line);transition:.12s;
 }
-.opt:hover:not(:disabled){border-color:#4a6ea8;background:var(--panel-2)}
+.opt:hover:not(:disabled){border-color:var(--edge);background:var(--panel-2)}
 .opt.correct{border-color:var(--good);background:rgba(79,220,149,.12)}
 .opt.wrong{border-color:var(--bad);background:rgba(255,111,94,.12)}
 .opt:disabled{cursor:default}
@@ -250,14 +296,14 @@ svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#0814
   display:flex;gap:11px;align-items:center;text-align:left;
   padding:11px 14px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
 }
-.seq .step:hover:not(:disabled){border-color:#4a6ea8}
+.seq .step:hover:not(:disabled){border-color:var(--edge)}
 .seq .step.picked{border-color:var(--tok);background:rgba(58,212,187,.10);opacity:.75}
 .seq .step.bad{border-color:var(--bad);background:rgba(255,111,94,.12)}
 .seq .num{
   flex:0 0 24px;height:24px;border-radius:7px;background:var(--panel-2);
   display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--dim);
 }
-.seq .step.picked .num{background:var(--tok);color:#062b25}
+.seq .step.picked .num{background:var(--tok);color:var(--on-tok)}
 
 /* matching */
 .match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -267,13 +313,13 @@ svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#0814
   text-align:left;padding:10px 13px;border-radius:10px;font-size:13.5px;
   background:var(--panel);border:1px solid var(--line);transition:.12s;
 }
-.mi:hover:not(:disabled){border-color:#4a6ea8}
+.mi:hover:not(:disabled){border-color:var(--edge)}
 .mi.sel{border-color:var(--gold);background:rgba(245,185,63,.12)}
 .mi.gone{opacity:.32;border-style:dashed;cursor:default}
 .mi.flash{border-color:var(--bad);background:rgba(255,111,94,.14)}
 
 /* labelling */
-.diagram{background:#0a1526;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:12px}
+.diagram{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:12px}
 .diagram svg{display:block;width:100%;height:auto}
 .hot{cursor:pointer;fill:rgba(245,185,63,.05);stroke:rgba(245,185,63,.5);stroke-width:1.3;stroke-dasharray:5 4}
 .hot:hover{fill:rgba(245,185,63,.16)}
@@ -283,7 +329,7 @@ svg.map{display:block;width:100%;height:auto;border-radius:10px;background:#0814
 .dtitle{fill:#cfe0f5;font-size:11px;font-weight:600}
 
 /* data */
-.chart{background:#0a1526;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.chart{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
 .chart .ct{font-size:13px;font-weight:600;margin-bottom:2px}
 .chart .cs{font-size:11.5px;color:var(--dim);margin-bottom:10px}
 table.data{width:100%;border-collapse:collapse;font-size:13px}
@@ -300,28 +346,28 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 .scheme{margin-top:14px;padding:14px 16px;border-radius:11px;background:var(--panel);border:1px solid var(--line)}
 .scheme h4{margin:0 0 4px;font-size:13px}
 .scheme .note{font-size:12px;color:var(--dim);margin-bottom:11px}
-.scheme label{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13.5px;cursor:pointer;border-top:1px solid rgba(38,57,90,.6)}
+.scheme label{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13.5px;cursor:pointer;border-top:1px solid var(--hair)}
 .scheme label input{margin-top:3px;accent-color:var(--tok);width:16px;height:16px;flex:0 0 auto}
 .scheme h5{margin:0 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
 
 /* running mark total */
 .scheme .tally{
   font-size:12px;color:var(--muted);padding:6px 10px;border-radius:8px;
-  background:#0e1a2e;border:1px solid var(--line);display:inline-block;margin-bottom:6px;
+  background:var(--sunk);border:1px solid var(--line);display:inline-block;margin-bottom:6px;
 }
 .scheme .tally b{color:var(--ink);font-size:13px}
 .scheme .tally.full{border-color:rgba(79,220,149,.5)}
 .scheme .tally.full b{color:var(--good)}
 
 /* point + reason pairs (4-mark questions) */
-.scheme .pr{border-top:1px solid rgba(38,57,90,.6);padding:4px 0 6px}
+.scheme .pr{border-top:1px solid var(--hair);padding:4px 0 6px}
 .scheme .pr label{border-top:0;padding:6px 0}
 .scheme .pr .r{margin-left:26px;color:var(--muted)}
 .scheme .pr .r.off{opacity:.45}
 .scheme .pr span{display:flex;gap:8px;align-items:flex-start}
 .scheme .pr span i{
   font-style:normal;font-size:10.5px;font-weight:700;line-height:1.5;
-  padding:0 6px;border-radius:99px;background:#0e1a2e;border:1px solid var(--line);
+  padding:0 6px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);
   color:var(--dim);flex:none;margin-top:1px;
 }
 .scheme .pr .p input:checked ~ span i{border-color:var(--tok);color:var(--tok)}
@@ -329,7 +375,7 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 
 /* levels of response (8-mark questions) */
 .scheme .ind{
-  padding:11px 13px;border-radius:10px;background:#0e1a2e;border:1px solid var(--line);margin-bottom:12px;
+  padding:11px 13px;border-radius:10px;background:var(--sunk);border:1px solid var(--line);margin-bottom:12px;
 }
 .scheme .ind ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--muted);line-height:1.6}
 .scheme .ind .cav{font-size:11.5px;color:var(--dim);margin-top:8px;font-style:italic}
@@ -350,12 +396,12 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 /* brief / case study panel */
 .brief{
   padding:14px 16px;border-radius:12px;margin-bottom:18px;
-  background:linear-gradient(180deg,#152640,#111c30);border:1px solid var(--line);
+  background:var(--brief-bg);border:1px solid var(--line);
 }
 .brief h4{margin:0 0 6px;font-size:13px;color:var(--gold)}
-.brief p{margin:0;font-size:13.5px;color:#c3d3ea;line-height:1.55}
+.brief p{margin:0;font-size:13.5px;color:var(--soft);line-height:1.55}
 .facts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
-.facts span{font-size:11.5px;padding:4px 10px;border-radius:99px;background:#0e1a2e;border:1px solid var(--line);color:var(--muted)}
+.facts span{font-size:11.5px;padding:4px 10px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);color:var(--muted)}
 
 /* summary */
 .sum{text-align:center;padding:14px 0}
@@ -379,7 +425,7 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
   padding:12px 15px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
   margin-bottom:8px;transition:.12s;
 }
-.buy:hover:not(:disabled){border-color:#4a6ea8}
+.buy:hover:not(:disabled){border-color:var(--edge)}
 .buy.on{border-color:var(--tok);background:rgba(58,212,187,.10)}
 .buy:disabled{opacity:.42;cursor:not-allowed}
 .buy .bn{font-weight:600;font-size:14px}
@@ -401,7 +447,7 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 .stat .l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px}
 .debrief{text-align:left;font-size:13.5px;line-height:1.6}
 .debrief h4{font-size:13px;color:var(--gold);margin:16px 0 7px}
-.debrief li{margin-bottom:7px;color:#c3d3ea}
+.debrief li{margin-bottom:7px;color:var(--soft)}
 .debrief li b{color:var(--ink)}
 
 @media (max-width:640px){
@@ -411,64 +457,164 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
   .hud{gap:12px}
   .brand h1{font-size:15px}
 }
+
+/* ============================================================
+   THE DIALOG — the challenge window, built like the desktop
+   dialog the course is drawn in: hard border, violet title bar,
+   pale paper inside, because this is the one surface that has
+   to carry long stretches of reading.
+   ============================================================ */
+.scrim{
+  --panel:#ffffff;
+  --panel-2:#efeaff;
+  --line:#b9b2d6;
+  --ink:#1a0f36;
+  --muted:#4e4470;
+  --dim:#6d6394;
+  --soft:#3c3260;
+  --sunk:#efeaff;
+  --edge:#6a4fd8;
+  --edge-soft:#e3dcff;
+  --hair:#d9d3ef;
+  --brief-bg:linear-gradient(180deg,#ece2ff,#e2d6ff);
+  --on-tok:#04322a;
+  --tok:#0d8f7c;
+  --good:#1a8f4f;
+  --bad:#c8341f;
+  --gold:#8a5300;
+  --bg-2:var(--chrome);
+  --shadow:12px 12px 0 rgba(10,4,24,.5);
+  background:rgba(20,10,44,.72);
+  backdrop-filter:blur(3px);
+}
+.scrim *{border-radius:0}
+.scrim .modal{border:3px solid #120826;background:var(--chrome)}
+.scrim .mhead{
+  background:linear-gradient(90deg,#6a4fd8,#b34fd8 65%,#3fd3ef);
+  border-bottom:3px solid #120826;padding:9px 10px 9px 14px;
+}
+.scrim .mhead .loc{font:700 10.5px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.9)}
+.scrim .mhead h2{color:#fff;font-size:16px;text-shadow:2px 2px 0 rgba(18,8,38,.4)}
+.scrim .mhead .prog{color:rgba(255,255,255,.92);font-family:var(--mono);font-size:11.5px}
+.scrim .x{
+  width:28px;height:24px;flex:none;background:var(--chrome);border:2px solid #120826;
+  box-shadow:inset -2px -2px 0 var(--chrome-lo),inset 2px 2px 0 var(--chrome-hi);
+  color:#120826;font:700 13px/1 var(--mono);padding:0;display:grid;place-items:center;
+}
+.scrim .x:hover{background:#e6e2f5;color:#120826}
+.scrim .mbody{background:var(--paper);color:var(--ink)}
+.scrim .mfoot{background:#bdb8d4;border-top:3px solid #120826}
+
+.scrim .qtype{font-family:var(--mono);color:#6a4fd8;font-weight:700}
+.scrim .opt,.scrim .seq .step,.scrim .mi,.scrim .buy,.scrim .scheme,
+.scrim .budget,.scrim .stat,.scrim .chart,.scrim textarea.exam{border-width:2px}
+.scrim .opt:hover:not(:disabled),.scrim .seq .step:hover:not(:disabled),
+.scrim .mi:hover:not(:disabled),.scrim .buy:hover:not(:disabled){background:var(--edge-soft)}
+.scrim .opt .k{font-family:var(--mono);color:#6a4fd8}
+.scrim .seq .num{font-family:var(--mono)}
+.scrim .fb.ok{background:#dcf7e6;border-color:var(--good)}
+.scrim .fb.no{background:#ffe4de;border-color:var(--bad)}
+.scrim .fb.hint{background:#fff0cf;border-color:#c78a00}
+.scrim .fb .earn{font-family:var(--mono)}
+.scrim .brief h4{font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;font-size:10.5px;color:#6a4fd8}
+.scrim .facts span{background:#fff;border-color:var(--line);font-family:var(--mono);font-size:11px}
+.scrim .sum .big{font-family:var(--mono)}
+.scrim .medal{filter:none}
+.scrim .stat .v{font-family:var(--mono)}
+.scrim .budget .amt,.scrim .buy .cost,.scrim .gauge .n{font-family:var(--mono)}
+.scrim table.data th{font-family:var(--mono);color:#5c5480}
+.scrim .cat>h4{font-family:var(--mono);color:#6a4fd8}
+.scrim .debrief h4{font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;font-size:10.5px;color:#6a4fd8}
+.scrim .debrief li{color:var(--soft)}
+.scrim .scheme .pr span i{background:#fff;font-family:var(--mono)}
+.scrim .scheme .mk{font-family:var(--mono)}
+
+/* the diagrams are their own dark instrument panel, set into the paper */
+.scrim .diagram{background:#0b1b30;border:3px solid #120826;padding:6px}
+.scrim .dlabel{fill:#9fb4d4}
+.scrim .dtitle{fill:#cfe0f5}
+.scrim .hot{fill:rgba(255,209,102,.06);stroke:rgba(255,209,102,.6)}
+.scrim .hot:hover{fill:rgba(255,209,102,.2)}
+.scrim .hot.got{fill:rgba(63,217,127,.28);stroke:#3fd97f}
+.scrim .hot.miss{fill:rgba(255,90,74,.28);stroke:#ff5a4a}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+@media (max-width:760px){
+  .wrap{padding:12px 10px 40px}
+  canvas#world{height:340px}
+  .ruler span{font-size:8.5px}
+  .titlebar .tsub{display:none}
+  .mark{min-width:78px;max-width:130px;padding:4px 6px}
+  .mark .l{font-size:11px}
+  .mark .s{display:none}
+  .row .nm i{display:none}
+  .match{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
 <div class="wrap">
 
-  <!-- ================= HUD ================= -->
-  <header class="hud">
-    <div class="brand">
-      <h1>Hazardous Earth — Expedition</h1>
-      <div class="sub">Edexcel GCSE Geography B · Component 1 · Topic 1</div>
-    </div>
-    <div class="tokens" title="Tokens earned from challenges. Spend them in the level finale.">
-      <span class="gem">◈</span><span class="n" id="tokCount">0</span>
-    </div>
-    <div class="meta">
-      <div id="topicCount">0 / 7 topics · 0 / 4 case studies</div>
-      <div id="unlockNote">Finale locked</div>
-    </div>
-    <button class="btn ghost" id="resetBtn" title="Wipe saved progress">Reset</button>
-  </header>
+  <!-- ============ LEVEL TABS — the nine specification topics ============ -->
+  <nav class="tabs" id="tabs" aria-label="Specification levels"></nav>
 
-  <!-- ================= LEVEL RAIL ================= -->
-  <nav class="rail" id="rail"></nav>
+  <div class="win">
 
-  <!-- ================= MAP ================= -->
-  <section class="mapcard">
-    <div class="maptop">
-      <h2>The Hazardous Earth map</h2>
-      <div class="key">
-        <span><i style="background:var(--c-constructive)"></i>Constructive</span>
-        <span><i style="background:var(--c-destructive)"></i>Destructive</span>
-        <span><i style="background:var(--c-conservative)"></i>Conservative</span>
-        <span><i style="background:var(--c-collision)"></i>Collision</span>
+    <!-- ============ TITLE BAR ============ -->
+    <div class="titlebar">
+      <span class="tt">HAZARDOUS EARTH</span>
+      <span class="tsub">Edexcel GCSE Geography B · Component 1 · Topic 1</span>
+      <button class="winbtn" id="resetBtn" title="Wipe saved progress and start again" aria-label="Wipe saved progress">✕</button>
+    </div>
+
+    <!-- ============ STATUS STRIP ============ -->
+    <div class="status">
+      <div class="gauge" title="Tokens earned from challenges. Spend them in the level finale.">
+        <span class="gem">◈</span><span class="n" id="tokCount">0</span>
       </div>
-      <div class="key">
-        <span><i class="rd" style="background:#b98cff"></i>Tectonic pair</span>
-        <span><i class="rd" style="background:#3ad4bb"></i>Cyclone pair</span>
+      <div class="counts" id="topicCount"></div>
+      <div class="note" id="unlockNote">Finale locked</div>
+    </div>
+
+    <!-- ============ THE COURSE ============ -->
+    <div class="stage" id="stage" tabindex="0" role="application"
+         aria-label="The Hazardous Earth course — run and jump between topics, or use the course index below">
+      <canvas id="world"></canvas>
+      <div class="ruler" id="ruler" aria-hidden="true"></div>
+      <div class="markers" id="markers"></div>
+      <div class="pad" aria-hidden="true">
+        <button data-key="left"  aria-label="Run left">◄</button>
+        <button data-key="right" aria-label="Run right">►</button>
+        <button data-key="jump"  aria-label="Jump">▲</button>
       </div>
-      <label class="toggle"><input type="checkbox" id="cellsToggle"> Show circulation cells</label>
     </div>
-    <div id="mapHost"></div>
-    <p class="maphint">The four pins are the case studies, coloured by pair. Click one to open it.</p>
 
-    <div class="listtop">
-      <h3>Case studies</h3>
-      <span class="sublabel">Four studies in two linked pairs — do both halves to unlock each comparison</span>
+    <div class="ctrl">
+      <span><kbd>←</kbd><kbd>→</kbd> run · <kbd>↑</kbd> jump · <kbd>↵</kbd> open the stop you are standing at</span>
+      <span class="sp" id="whereNow"></span>
     </div>
-    <div class="cases" id="caseList"></div>
 
-    <div class="listtop">
-      <h3>Topics</h3>
-      <span class="sublabel">The specification content, tested as concepts</span>
+    <!-- ============ COURSE INDEX ============ -->
+    <div class="index">
+      <div class="idxhead">
+        <h3>TOPICS</h3>
+        <span class="sub">The specification content in order, tested as concepts</span>
+      </div>
+      <div id="topicList"></div>
+
+      <div class="idxhead">
+        <h3>CASE STUDIES</h3>
+        <span class="sub">Two linked pairs at the end of the course — do both halves to open each comparison</span>
+      </div>
+      <div id="caseList"></div>
     </div>
-    <div class="sites" id="topicList"></div>
 
     <div class="finale" id="finaleCard"></div>
-  </section>
+  </div>
 
 </div>
 
@@ -492,77 +638,7 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 "use strict";
 
 /* ============================================================================
-   1. WORLD GEOMETRY
-   Coastlines and plate boundaries are stored as [longitude, latitude] pairs
-   and projected at runtime, so every pin sits at its true position on Earth.
-   ============================================================================ */
-
-var MAP_W = 1000, MAP_H = 500;            // equirectangular: 1 degree = 2.7778 units
-
-function project(lon, lat){
-  return { x: (lon + 180) / 360 * MAP_W, y: (90 - lat) / 180 * MAP_H };
-}
-
-var LANDMASSES = [
-  { n:"Africa", p:[[-17,21],[-17,15],[-16,12],[-13,9],[-8,4.5],[2,6],[9,4],[9,0],[13,-5],[12,-16],[15,-27],[18,-34],[25,-34],[32,-29],[35,-24],[40,-16],[40,-10],[39,-6],[41,-1],[43,2],[51,12],[43,12],[38,15],[37,22],[34,28],[32,31],[25,32],[15,32],[10,37],[3,36],[-2,35],[-6,36],[-10,30]] },
-  { n:"Eurasia", p:[[-9,36],[-9,43],[-1,43],[-1,46],[-4,48],[2,51],[4,53],[8,54],[10,58],[5,59],[5,62],[12,65],[18,69],[28,71],[33,66],[41,66],[44,68],[55,68],[60,70],[69,73],[73,68],[78,72],[90,76],[105,78],[113,74],[128,73],[140,72],[160,70],[172,67],[179,65],[170,60],[163,58],[157,52],[160,54],[153,49],[143,53],[141,46],[135,43],[130,42],[126,40],[122,39],[120,36],[122,31],[118,25],[110,21],[108,16],[106,10],[100,8],[98,8],[100,13],[97,16],[94,18],[90,22],[87,21],[80,15],[77,8],[73,15],[70,22],[67,24],[60,25],[57,26],[50,29],[48,30],[52,26],[57,23],[52,17],[45,13],[43,12],[39,20],[35,28],[35,31],[36,36],[30,36],[26,38],[24,40],[19,40],[18,40],[16,38],[15,38],[12,44],[13,45],[8,44],[3,43],[-2,36]] },
-  { n:"North America", p:[[-168,66],[-166,60],[-162,58],[-158,56],[-152,59],[-148,60],[-140,60],[-135,57],[-130,54],[-124,49],[-124,43],[-121,36],[-117,33],[-114,31],[-110,24],[-106,23],[-97,26],[-97,21],[-95,19],[-91,18],[-88,16],[-83,11],[-79,9],[-83,15],[-88,21],[-91,19],[-94,29],[-89,29],[-85,30],[-82,27],[-80,25],[-81,31],[-76,35],[-74,40],[-70,42],[-66,45],[-60,47],[-56,51],[-64,54],[-78,53],[-79,62],[-95,62],[-92,68],[-105,68],[-115,70],[-125,70],[-133,69],[-141,70],[-156,71],[-166,68]] },
-  { n:"Greenland", p:[[-45,60],[-50,64],[-53,67],[-55,70],[-60,76],[-68,78],[-62,82],[-45,83],[-30,83],[-22,80],[-20,75],[-25,72],[-32,68],[-40,64]] },
-  { n:"South America", p:[[-81,6],[-79,9],[-75,11],[-71,12],[-63,10],[-60,7],[-52,5],[-50,0],[-44,-2],[-38,-5],[-35,-8],[-39,-13],[-39,-18],[-43,-23],[-48,-25],[-53,-34],[-57,-38],[-62,-40],[-65,-45],[-68,-50],[-70,-55],[-75,-52],[-73,-45],[-73,-37],[-71,-30],[-70,-23],[-75,-15],[-77,-8],[-81,-6],[-80,-2],[-79,1],[-77,4]] },
-  { n:"Australia", p:[[113,-22],[114,-26],[115,-32],[118,-35],[125,-32],[131,-31],[135,-35],[138,-35],[140,-38],[145,-38],[150,-37],[153,-32],[153,-25],[146,-19],[142,-11],[136,-12],[130,-11],[129,-15],[124,-16],[122,-18]] },
-  { n:"Tasmania", p:[[145,-41],[148,-41],[148,-43],[145,-43]] },
-  { n:"New Zealand", p:[[172,-34],[174,-37],[178,-38],[177,-40],[174,-41],[171,-44],[167,-46],[166,-45],[170,-43],[172,-40]] },
-  { n:"Japan", p:[[130,31],[132,34],[136,35],[140,38],[141,41],[145,44],[142,45],[140,41],[137,37],[133,34],[130,33]] },
-  { n:"Great Britain", p:[[-5,50],[-3,51],[1,51],[0,53],[-1,54],[-2,56],[-3,58],[-5,58],[-6,56],[-5,54],[-3,53],[-4,51]] },
-  { n:"Ireland", p:[[-10,52],[-6,52],[-6,54],[-8,55],[-10,54]] },
-  { n:"Iceland", p:[[-24,65],[-19,66],[-15,66],[-14,65],[-18,63],[-22,64]] },
-  { n:"Philippines", p:[[120,18],[122,16],[124,13],[126,10],[126,7],[122,6],[120,10],[120,13]] },
-  { n:"Sumatra", p:[[95,5],[99,2],[104,-2],[106,-6],[102,-5],[98,1]] },
-  { n:"Java", p:[[105,-6],[114,-8],[114,-9],[105,-7]] },
-  { n:"Borneo", p:[[109,2],[114,4],[118,5],[119,1],[117,-3],[110,-3]] },
-  { n:"New Guinea", p:[[131,-1],[140,-2],[147,-6],[150,-10],[143,-9],[137,-8],[131,-3]] },
-  { n:"Madagascar", p:[[43,-12],[49,-13],[50,-18],[47,-25],[45,-22],[43,-17]] },
-  { n:"Sri Lanka", p:[[80,10],[82,8],[81,6],[80,7]] },
-  { n:"Cuba", p:[[-85,22],[-77,21],[-74,20],[-79,22],[-84,23]] }
-];
-
-var ANTARCTICA = [[-180,-72],[-160,-78],[-140,-75],[-120,-74],[-100,-73],[-80,-72],[-60,-64],[-45,-62],[-20,-70],[0,-70],[20,-70],[40,-68],[60,-67],[80,-66],[100,-66],[120,-66],[140,-67],[160,-78],[180,-78],[180,-90],[-180,-90]];
-
-/* Plate boundaries, colour-coded by type — the map itself is a revision aid. */
-var BOUNDARIES = [
-  { t:"constructive", p:[[-18,67],[-25,60],[-30,52],[-33,45],[-32,38],[-28,28],[-25,18],[-22,10],[-15,2],[-13,-8],[-12,-20],[-13,-32],[-10,-42],[-5,-50],[5,-55],[20,-55]] },
-  { t:"constructive", p:[[-105,25],[-108,15],[-105,5],[-102,-5],[-110,-20],[-115,-30],[-118,-40],[-125,-50],[-140,-55],[-160,-58],[-175,-60]] },
-  { t:"constructive", p:[[35,29],[40,20],[45,13],[52,3],[60,-10],[68,-25],[75,-38],[85,-48],[100,-50],[120,-52],[140,-55]] },
-  { t:"destructive", p:[[-72,10],[-75,-5],[-74,-18],[-72,-30],[-73,-42],[-75,-52]] },
-  { t:"destructive", p:[[-105,20],[-95,14],[-87,11],[-80,8]] },
-  { t:"destructive", p:[[-127,49],[-130,55],[-140,58],[-152,57],[-165,53],[-175,52],[-180,51]] },
-  { t:"destructive", p:[[180,51],[170,52],[163,54],[160,55],[155,48],[147,42],[143,38],[140,33],[135,30],[130,28]] },
-  { t:"destructive", p:[[128,25],[128,15],[126,8],[122,3]] },
-  { t:"destructive", p:[[95,5],[98,-2],[105,-8],[115,-11],[125,-11],[132,-6]] },
-  { t:"destructive", p:[[-175,-18],[-176,-25],[-178,-32],[-180,-36]] },
-  { t:"destructive", p:[[-5,36],[5,38],[15,38],[25,36],[35,36],[45,38]] },
-  { t:"collision", p:[[68,35],[72,34],[78,32],[85,28],[92,27],[97,28]] },
-  { t:"conservative", p:[[-115,31],[-118,34],[-122,37],[-124,40]] },
-  { t:"conservative", p:[[28,38],[33,39],[38,40],[43,40]] }
-];
-
-var BOUNDARY_COLOUR = {
-  constructive:"#4fdc95", destructive:"#ff7a5e",
-  conservative:"#ffd166", collision:"#b98cff"
-};
-
-/* Global atmospheric circulation cells, drawn as latitude bands. */
-var CELLS = [
-  { name:"POLAR CELL",  from:60,  to:90  },
-  { name:"FERREL CELL", from:30,  to:60  },
-  { name:"HADLEY CELL", from:0,   to:30  },
-  { name:"HADLEY CELL", from:-30, to:0   },
-  { name:"FERREL CELL", from:-60, to:-30 },
-  { name:"POLAR CELL",  from:-90, to:-60 }
-];
-
-/* ============================================================================
-   2. GAME CONTENT
+   1. GAME CONTENT
    Everything below is editable without touching any engine code.
    Question types: mcq | order | match | label | data | exam
    ============================================================================ */
@@ -589,6 +665,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.1 ---- */
 {
   id:"circulation", ref:"1.1", name:"Global atmospheric circulation",
+  short:"Circulation",
   theme:"Cells, pressure belts, winds, and the pattern of world climate zones",
   brief:"Three circulation cells in each hemisphere carry surplus heat from the tropics towards the poles. Where air rises you get low pressure and rain; where it sinks you get high pressure and desert. Get this straight and the position of the rainforests, the hot deserts, the trade winds and the tropical cyclone belts all follow from it. Switch on 'Show circulation cells' on the map to see the bands.",
   keys:["Hadley · Ferrel · Polar","Rising air = low pressure","Sinking air = high pressure","Coriolis deflection","The ITCZ"],
@@ -664,6 +741,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.2 ---- */
 {
   id:"naturalchange", ref:"1.2", name:"Natural climate change",
+  short:"Climate change",
   theme:"Quaternary fluctuations, the evidence for them, and their natural causes",
   brief:"The climate changed long before anyone burned a lump of coal. Through the Quaternary — the last 2.6 million years — the Earth has swung between cold glacials and warm interglacials roughly every 100,000 years. This topic is about how we know that, from ice cores, tree rings, pollen and historical records, and what drove it: orbital cycles, variations in solar output, and volcanic eruptions.",
   keys:["Quaternary period","Ice cores over 400,000 years","Milankovitch cycles","Solar output","Volcanic cooling"],
@@ -727,6 +805,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.3 ---- */
 {
   id:"cyclones", ref:"1.3", name:"Tropical cyclones: formation and structure",
+  short:"Cyclones",
   theme:"The conditions a cyclone needs, why it spins, what the parts are called, and how it is measured",
   brief:"Tropical cyclones need warm deep ocean, unstable rising air and enough spin from the Coriolis effect — which is why they form in a belt between about 5° and 30° of latitude and never on the equator itself. This topic covers the conditions, the sequence of formation, the anatomy of the storm and the scale used to rank it.",
   keys:["Sea over 26.5°C","5°–30° latitude","Eye and eyewall","Rain bands","Saffir–Simpson 1–5"],
@@ -807,6 +886,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.4 ---- */
 {
   id:"vulnerability", ref:"1.4", name:"Hazards, vulnerability and responses",
+  short:"Vulnerability",
   theme:"How a natural hazard becomes a disaster, and the vocabulary examiners expect",
   brief:"A hazard is a physical event; a disaster is what happens when that event meets a vulnerable population. This topic is the framework you apply to every case study: separating primary from secondary effects, immediate from long-term responses, and explaining why the same magnitude of event produces wildly different outcomes in different places.",
   keys:["Hazard vs disaster","Primary and secondary effects","Immediate and long-term responses","Vulnerability","The development contrast"],
@@ -881,6 +961,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.5 ---- */
 {
   id:"plates", ref:"1.5", name:"Earth's structure and plate boundaries",
+  short:"Plate boundaries",
   theme:"What is inside the Earth, what moves the plates, and the four types of boundary",
   brief:"Beneath a thin crust lies the mantle, and convection in it — helped by the pull of dense subducting slabs — drags the plates across the surface. Almost every tectonic hazard happens where two plates meet, and there are four ways they can meet: pulling apart, colliding with subduction, colliding without it, and sliding past. Each produces a distinctive set of landforms and hazards. The coloured lines on the map show where each type runs.",
   keys:["Crust · mantle · core","Convection and slab pull","Constructive","Destructive","Conservative","Collision"],
@@ -956,6 +1037,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.6 ---- */
 {
   id:"tectonichazards", ref:"1.6", name:"Tectonic hazards and their effects",
+  short:"Tectonic hazards",
   theme:"Earthquakes, volcanoes, and the secondary hazards that follow them",
   brief:"A plate boundary generates the hazard; the ground, the sea and the ice above it decide what form the damage takes. This topic covers how earthquakes are described, the secondary hazards that follow — liquefaction, landslides, aftershocks and tsunamis — and how the type of magma at a boundary decides whether a volcano oozes or explodes.",
   keys:["Focus and epicentre","Liquefaction","Tsunami","Shield vs composite","Pyroclastic flows and lahars"],
@@ -1031,6 +1113,7 @@ var TOPICS = [
 /* ---------------------------------------------------------------- 1.7 ---- */
 {
   id:"managing", ref:"1.7", name:"Managing tectonic hazards",
+  short:"Managing hazards",
   theme:"Prediction, preparation, protection and planning — and which of them actually saves lives",
   brief:"You cannot stop an earthquake, so management means reducing what it does to people. The four Ps give you a structure for any management answer: prediction (knowing it is coming), preparation (knowing what to do), protection (building so it survives) and planning (deciding where to build at all). The trade-offs between them — cost against lives saved — are exactly what evaluation questions are asking about.",
   keys:["The four Ps","Early-warning systems","Drills and education","Aseismic design","Land-use zoning"],
@@ -1128,7 +1211,6 @@ var PAIRS = [
   /* ------------------------------------------------------------ Japan ---- */
   {
     id:"tohoku", short:"Tōhoku", name:"Tōhoku, Japan", sub:"Earthquake and tsunami, 2011",
-    lon:142.40, lat:38.30,
     brief:"At 14:46 on 11 March 2011 a magnitude 9.0 megathrust earthquake ruptured the Japan Trench about 130 km east of Sendai, where the Pacific plate subducts beneath Japan. The seabed jolted upwards by several metres and the tsunami that followed reached run-up heights of up to 40 m, travelling as far as 10 km inland. Around 18,500 people died or went missing, over ninety per cent of them by drowning. It remains the costliest natural disaster ever recorded, at roughly $235 billion.",
     facts:["11 March 2011","Magnitude 9.0","Focus ~30 km deep","Tsunami run-up up to ~40 m","~18,500 dead or missing","~$235 billion"],
     qs:[
@@ -1224,7 +1306,6 @@ var PAIRS = [
   /* ------------------------------------------------------------ Nepal ---- */
   {
     id:"gorkha", short:"Gorkha", name:"Gorkha, Nepal", sub:"Earthquake, 2015",
-    lon:84.70, lat:28.20,
     brief:"On 25 April 2015 a magnitude 7.8 earthquake struck the Gorkha district about 80 km north-west of Kathmandu, with a shallow focus roughly 15 km down. Nepal sits on the collision boundary where the Indian plate drives into the Eurasian plate and pushes up the Himalayas. Around 8,900 people died and some 600,000 homes were destroyed. Nepal is one of the poorest countries in Asia, and the damage bill of roughly $5 billion was about a quarter of its entire annual economy.",
     facts:["25 April 2015","Magnitude 7.8","Focus ~15 km deep","~8,900 deaths","~600,000 homes destroyed","~$5 billion (~25% of GDP)"],
     qs:[
@@ -1410,7 +1491,6 @@ var PAIRS = [
   /* -------------------------------------------------------------- Ida ---- */
   {
     id:"ida", short:"New Orleans", name:"New Orleans, USA", sub:"Hurricane Ida, 2021",
-    lon:-90.07, lat:29.95,
     brief:"Ida made landfall at Port Fourchon, Louisiana on 29 August 2021 as a Category 4 hurricane with sustained winds of about 240 km/h — one of the strongest storms ever recorded to strike the state. New Orleans lies largely below sea level, but the $14.5 billion system of levees, floodwalls and surge barriers that rings the city held, and it did not flood. What failed instead was the electricity grid: all eight transmission lines into the city went down, leaving over a million customers without power in late-August heat. Around 30 people died in Louisiana, most of them after the storm had passed, and damage across the USA reached roughly $75 billion.",
     facts:["29 August 2021","Category 4 at landfall","~240 km/h winds","Levees held — no city flooding","Whole grid failed","~30 deaths in Louisiana","~$75 billion"],
     qs:[
@@ -1501,7 +1581,6 @@ var PAIRS = [
   /* ---------------------------------------------------------- Haiyan ---- */
   {
     id:"haiyan", short:"Tacloban", name:"Tacloban, Philippines", sub:"Typhoon Haiyan, 2013",
-    lon:125.00, lat:11.24,
     brief:"On 8 November 2013 Typhoon Haiyan made landfall near Tacloban as a Category 5 super typhoon — one of the most powerful tropical cyclones ever to strike land. Sustained winds reached about 315 km/h and a storm surge of roughly 5 m swept through the city, which sits at the head of a funnel-shaped bay. Around 6,300 people died and damage reached roughly $12 billion. Over four million people were displaced.",
     facts:["8 November 2013","Category 5 at landfall","~315 km/h sustained winds","~5 m storm surge","~6,300 deaths","~$12 billion"],
     qs:[
@@ -1677,7 +1756,7 @@ var PAIRS = [
 ];
 
 /* ============================================================================
-   3. LEVEL FINALE — spend your tokens as a hazard-management budget
+   2. LEVEL FINALE — spend your tokens as a hazard-management budget
    ============================================================================ */
 
 var FINALE = {
@@ -1726,7 +1805,7 @@ var FINALE = {
 };
 
 /* ============================================================================
-   4. STATE
+   3. STATE
    ============================================================================ */
 
 var SAVE_KEY = "hazardous-earth-v3";   /* keys changed when case studies split from topics */
@@ -1811,175 +1890,683 @@ function shuffle(a){
 }
 
 /* ============================================================================
-   5. THE MAP
+   4. THE COURSE
+   The level is a cutaway of the hazardous Earth, and height on screen means
+   what it says: the run starts on a cloud deck in the upper atmosphere, falls
+   through the storm band to the coast where people live, drops into a rift cut
+   through the crust, and climbs back out to the field stations at the end.
+   Everything is drawn at quarter scale and blown up, so one drawn pixel is
+   four screen pixels and nothing is ever anti-aliased.
    ============================================================================ */
 
-function pathOf(points, close){
-  var d = "";
-  for(var i=0;i<points.length;i++){
-    var pt = project(points[i][0], points[i][1]);
-    d += (i ? "L" : "M") + pt.x.toFixed(1) + " " + pt.y.toFixed(1) + " ";
-  }
-  return d + (close ? "Z" : "");
-}
+var PX      = 4;      // one drawn pixel, in screen pixels
+var VIEW_H  = 112;    // drawn height — 448 screen pixels
+var SURFACE = 74;     // sea level: the ground line people live on
+var STEP    = 152;    // distance between one stop and the next
+var FLAT    = 48;     // half-width of the level ground at each stop
 
-function buildMap(){
-  var s = [];
-  s.push('<svg class="map" viewBox="0 0 '+MAP_W+' '+MAP_H+'" role="img" aria-label="World map of Hazardous Earth case studies">');
+/* Where each topic sits in the Earth system, in order. 1.1 is high in the
+   atmosphere; 1.5 and 1.6 are inside the crust; 1.7 comes back to the surface,
+   because managing a hazard is something you do where the people are. */
+var TOPIC_DEPTH = [28, 42, 56, SURFACE, 88, 100, SURFACE];
 
-  /* ocean */
-  s.push('<defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">'+
-         '<stop offset="0%" stop-color="#0b1a30"/><stop offset="55%" stop-color="#08182b"/>'+
-         '<stop offset="100%" stop-color="#0a1424"/></linearGradient></defs>');
-  s.push('<rect width="'+MAP_W+'" height="'+MAP_H+'" fill="url(#sea)"/>');
+/* The hazard standing between each stop and the next. These are the obstacles
+   you jump, and each one is the hazard the topic behind it has just taught. */
+var GAP_HAZARD = ["gust","ice","eye","rubble","shard","lava","wave",
+                  "rubble","wave","shard","gust","rubble","wave"];
 
-  /* circulation cells (hidden by default) */
-  s.push('<g id="cellLayer" style="display:none">');
-  CELLS.forEach(function(c, i){
-    var top = project(0, Math.max(c.from,c.to)).y;
-    var bot = project(0, Math.min(c.from,c.to)).y;
-    if(i % 2 === 0) s.push('<rect class="cellband" x="0" y="'+top.toFixed(1)+'" width="'+MAP_W+'" height="'+(bot-top).toFixed(1)+'"/>');
-    s.push('<line class="cellline" x1="0" y1="'+top.toFixed(1)+'" x2="'+MAP_W+'" y2="'+top.toFixed(1)+'"/>');
-    s.push('<text class="celltext" x="8" y="'+((top+bot)/2+3).toFixed(1)+'">'+c.name+'</text>');
+var HAZARD = {
+  gust:  { w:15, h:11, name:"Jet-stream gust" },
+  ice:   { w:13, h:15, name:"Ice-age cold snap" },
+  eye:   { w:15, h:20, name:"Cyclone eyewall" },
+  rubble:{ w:17, h:12, name:"Collapsed masonry" },
+  shard: { w:13, h:17, name:"Fault scarp" },
+  lava:  { w:13, h:20, name:"Lava spurt" },
+  wave:  { w:19, h:14, name:"Tsunami surge" }
+};
+
+var STOPS = [], TERRAIN = [], OBSTACLES = [], SCENERY = [];
+var WORLD_W = 0, LAND_X = 0;
+
+var reduceMotion = window.matchMedia &&
+                   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Repeatable noise, so scenery is scattered but never shimmers between frames. */
+function rnd(i){ var v = Math.sin(i * 127.1) * 43758.5453; return v - Math.floor(v); }
+
+function buildCourse(){
+  STOPS = [];
+  TOPICS.forEach(function(t, i){
+    STOPS.push({ kind:"topic", id:t.id, ref:t.ref, label:t.short, full:t.name,
+                 y:TOPIC_DEPTH[i], colour:"#6a4fd8" });
   });
-  s.push('<line class="cellline" x1="0" y1="'+project(0,0).y+'" x2="'+MAP_W+'" y2="'+project(0,0).y+'"/>');
-  s.push('<text class="celltext" x="8" y="'+(project(0,0).y-4)+'">EQUATOR — ITCZ</text>');
-  s.push('</g>');
-
-  /* land */
-  s.push('<g>');
-  LANDMASSES.forEach(function(m){ s.push('<path class="land" d="'+pathOf(m.p,true)+'"/>'); });
-  s.push('<path class="ice" d="'+pathOf(ANTARCTICA,true)+'"/>');
-  s.push('</g>');
-
-  /* plate boundaries */
-  s.push('<g>');
-  BOUNDARIES.forEach(function(b){
-    s.push('<path class="boundary" stroke="'+BOUNDARY_COLOUR[b.t]+'" d="'+pathOf(b.p,false)+'"/>');
-  });
-  s.push('</g>');
-
-  /* case-study pins */
   PAIRS.forEach(function(pr){
     pr.studies.forEach(function(st){
-      var p = project(st.lon, st.lat);
-      var isDone = state.done[st.id] !== undefined;
-      s.push('<g class="pin'+(isDone?" done":"")+'" data-study="'+st.id+'" tabindex="0" role="button" '+
-             'style="--pair:'+pr.colour+'" aria-label="'+esc(st.name+" — "+st.sub)+'">');
-      s.push('<title>'+esc(st.name+" — "+st.sub+"\n"+pr.name)+'</title>');
-      s.push('<circle class="halo" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="15"/>');
-      s.push('<circle class="ring" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="9"/>');
-      s.push('<circle class="dot"  cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4.5"/>');
-      s.push('<text class="lbl" x="'+p.x.toFixed(1)+'" y="'+(p.y-17).toFixed(1)+'">'+
-             esc(st.short)+(isDone?" ✓":"")+'</text>');
-      s.push('</g>');
+      STOPS.push({ kind:"study", id:st.id, ref:"Case", label:st.short, full:st.name,
+                   y:SURFACE, colour:pr.colour });
     });
+    STOPS.push({ kind:"compare", id:pr.compare.id, ref:"Compare", label:pr.compare.name,
+                 full:pr.compare.name, y:SURFACE, colour:pr.colour, pair:pr });
+  });
+  STOPS.push({ kind:"finale", id:"__finale", ref:"Finale", label:FINALE.title,
+               full:FINALE.title, y:SURFACE, colour:"#ffc63c" });
+
+  STOPS.forEach(function(s, i){ s.x = 86 + i * STEP; });
+  WORLD_W = STOPS[STOPS.length - 1].x + 120;
+  LAND_X  = STOPS[3].x - FLAT;          // the coast: where solid ground begins
+
+  /* Terrain is a height profile — flat at every stop, a ramp in between. That
+     makes it impossible to get stuck, which matters more here than platforming
+     depth: nobody should be locked out of their revision by a missed jump. */
+  TERRAIN = [{ x:0, y:STOPS[0].y }];
+  STOPS.forEach(function(s){
+    TERRAIN.push({ x:s.x - FLAT, y:s.y });
+    TERRAIN.push({ x:s.x + FLAT, y:s.y });
+  });
+  TERRAIN.push({ x:WORLD_W, y:STOPS[STOPS.length - 1].y });
+
+  OBSTACLES = [];
+  for(var i = 0; i < STOPS.length - 1; i++){
+    var kind = GAP_HAZARD[i % GAP_HAZARD.length];
+    var d = HAZARD[kind];
+    var x = Math.round((STOPS[i].x + STOPS[i + 1].x) / 2);
+    OBSTACLES.push({ x:x, kind:kind, w:d.w, h:d.h, name:d.name, base:groundAt(x) });
+  }
+
+  buildScenery();
+}
+
+function groundAt(x){
+  if(x <= TERRAIN[0].x) return TERRAIN[0].y;
+  for(var i = 1; i < TERRAIN.length; i++){
+    var b = TERRAIN[i];
+    if(x <= b.x){
+      var a = TERRAIN[i - 1];
+      if(b.x === a.x) return b.y;
+      return a.y + (b.y - a.y) * (x - a.x) / (b.x - a.x);
+    }
+  }
+  return TERRAIN[TERRAIN.length - 1].y;
+}
+
+/* Scattered once, then only ever redrawn. */
+function buildScenery(){
+  SCENERY = [];
+  var i;
+  for(i = 0; i < 90; i++)                      // stars, high and thin
+    SCENERY.push({ t:"star", x:rnd(i) * WORLD_W, y:2 + rnd(i + 900) * 24, p:0.25 });
+  for(i = 0; i < 34; i++)                      // cloud banks, drifting layer
+    SCENERY.push({ t:"cloud", x:rnd(i + 40) * WORLD_W, y:30 + rnd(i + 300) * 30,
+                   w:12 + Math.floor(rnd(i + 500) * 18), p:0.45 });
+  for(i = 0; i < 60; i++)                      // magma bubbles, deep
+    SCENERY.push({ t:"bubble", x:rnd(i + 70) * WORLD_W, y:98 + rnd(i + 200) * 12, p:0.8 });
+}
+
+/* ----------------------------------------------------------------------------
+   The runner. Eleven pixels tall, in a hard hat, because everyone in this
+   level is doing field work on something that is trying to kill them.
+   ---------------------------------------------------------------------------- */
+var SPRITE_PAL = { H:"#ffc63c", h:"#c98f00", S:"#ffd0a4", B:"#2a1436",
+                   J:"#ff6b2e", j:"#c4400d", W:"#fff2d6", P:"#2f47a8", K:"#171038" };
+var SPRITE_TOP = [
+  "..HHHH..",
+  ".hHHHHh.",
+  "..SSSS..",
+  "..BSSB..",
+  "..SSSS..",
+  ".WJJJJW.",
+  "SJJJJJJS",
+  ".jJJJJj."
+];
+var SPRITE_LEGS = [
+  ["..PPPP..", "..P..P..", "..K..K.."],   // stand
+  ["..PPPP..", "..PP.P..", ".KK...K."],   // run, left leg forward
+  ["..PPPP..", "..P..P..", "...KK..."],   // pass
+  ["..PPPP..", "..P.PP..", ".K...KK."]    // run, right leg forward
+];
+var SPRITE_JUMP = ["..PPPP..", ".PP..PP.", ".K....K."];
+
+var hero = { x:86, y:TOPIC_DEPTH[0], vy:0, dir:1, ground:true, frame:0, walk:0, bump:0 };
+var camX = 0, tick = 0;
+
+/* ----------------------------------------------------------------------------
+   Canvas
+   ---------------------------------------------------------------------------- */
+var stage, cv, ctx, viewW = 240;
+
+function sizeCanvas(){
+  var wide = stage.clientWidth || 900;
+  viewW = Math.max(120, Math.round(wide / PX));
+  cv.width  = viewW;
+  cv.height = VIEW_H;
+  cv.style.height = (VIEW_H * PX) + "px";
+  ctx = cv.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+}
+
+function fill(c, x, y, w, h){ ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+
+/* A one-pixel checkerboard, which is how a 16-colour machine made a gradient. */
+function ditherRow(c, y, cam){
+  ctx.fillStyle = c;
+  for(var x = (cam + y) % 2; x < viewW; x += 2) ctx.fillRect(x, y, 1, 1);
+}
+
+function drawSprite(sx, sy, legs, dir){
+  var rows = SPRITE_TOP.concat([legs[0], legs[1], legs[2]]);
+  for(var r = 0; r < rows.length; r++){
+    var row = rows[r];
+    for(var c = 0; c < row.length; c++){
+      var ch = row.charAt(dir > 0 ? c : row.length - 1 - c);
+      if(ch === ".") continue;
+      ctx.fillStyle = SPRITE_PAL[ch];
+      ctx.fillRect(sx + c, sy + r, 1, 1);
+    }
+  }
+}
+
+function drawHazard(o, sx, h){
+  var top = Math.round(o.base) - h, x = sx - Math.floor(o.w / 2), w = o.w;
+  if(h <= 1) return;
+  switch(o.kind){
+    case "gust":
+      for(var i = 0; i < 4; i++){
+        var yy = top + i * 3, len = 5 + ((i + Math.floor(tick / 8)) % 3) * 4;
+        fill("#dff6ff", x + (i % 2) * 3, yy, len, 1);
+        fill("#8fd8ef", x + (i % 2) * 3 + len, yy, 3, 1);
+      }
+      break;
+    case "ice":
+      fill("#bde9ff", x, top, w, h);
+      fill("#ffffff", x, top, w, 2);
+      fill("#6bb6d8", x, top + h - 3, w, 3);
+      fill("#ffffff", x + 3, top + 4, 1, h - 8);
+      break;
+    case "eye":
+      fill("#2a2050", x, top, w, h);
+      for(var s = 0; s < h; s += 2){
+        var off = Math.round(Math.sin((s + tick * 0.18) * 0.5) * 3);
+        fill(s < h / 3 ? "#efe6ff" : "#9d8fe0", x + 2 + off, top + s, w - 4, 1);
+      }
+      fill("#120826", x + Math.floor(w / 2) - 1, top + Math.floor(h / 2), 2, 3);
+      break;
+    case "rubble":
+      fill("#8b8398", x, top + 4, w, h - 4);
+      fill("#b3aac2", x, top + 4, w, 2);
+      fill("#5f586e", x + 2, top + h - 4, w - 4, 2);
+      fill("#8b8398", x + 4, top, 5, 5);
+      fill("#d8cfe4", x + 4, top, 5, 1);
+      break;
+    case "shard":
+      for(var k = 0; k < h; k++){
+        var iw = Math.max(2, Math.round(w * (1 - k / h) * 0.5) * 2);
+        fill(k < 3 ? "#d4512a" : "#7a4327", x + Math.floor((w - iw) / 2), top + k, iw, 1);
+      }
+      break;
+    case "lava":
+      fill("#ff3d0d", x + 2, top, w - 4, h);
+      fill("#ffc63c", x + 4, top + 1, w - 8, h - 2);
+      fill("#fff2c0", x + Math.floor(w / 2) - 1, top, 2, 4);
+      fill("#3a1f13", x, Math.round(o.base) - 2, w, 3);
+      break;
+    case "wave":
+      fill("#1f7fd0", x, top + 3, w, h - 3);
+      fill("#5cc4f5", x, top + 3, w, 2);
+      for(var f = 0; f < 4; f++)
+        fill("#ffffff", x + 2 + f * 4, top + ((f + Math.floor(tick / 10)) % 2), 3, 2);
+      break;
+  }
+}
+
+function hazardHeight(o){
+  if(o.kind !== "lava") return o.h;
+  if(reduceMotion) return Math.round(o.h * 0.45);
+  return Math.round(o.h * (0.5 + 0.5 * Math.sin(tick * 0.045 + o.x)));
+}
+
+function drawCourse(){
+  var cam = Math.floor(camX), x, y, wx, g;
+
+  /* --- the atmosphere, in bands, dithered where one gives way to the next --- */
+  fill("#2b1466", 0, 0,  viewW, 26);
+  fill("#3f2296", 0, 26, viewW, 16);
+  fill("#5b3fd6", 0, 42, viewW, 16);
+  fill("#7d5eea", 0, 58, viewW, 10);
+  fill("#9d86f2", 0, 68, viewW, SURFACE - 68);
+  ditherRow("#3f2296", 25, cam); ditherRow("#3f2296", 24, cam);
+  ditherRow("#5b3fd6", 41, cam); ditherRow("#7d5eea", 57, cam);
+  ditherRow("#9d86f2", 67, cam);
+
+  /* --- scenery behind everything, at its own parallax --- */
+  SCENERY.forEach(function(s){
+    var px = Math.round(s.x - cam * s.p);
+    if(s.t === "star"){
+      px = ((px % WORLD_W) + WORLD_W) % WORLD_W;
+      if(px < viewW) fill(rnd(s.x) > 0.6 ? "#ffffff" : "#c9b6ff", px, s.y, 1, 1);
+    } else if(s.t === "cloud"){
+      if(px > -40 && px < viewW){
+        var drift = reduceMotion ? 0 : Math.round(Math.sin(tick * 0.006 + s.x) * 3);
+        fill("rgba(255,255,255,.20)", px + drift, s.y, s.w, 3);
+        fill("rgba(255,255,255,.13)", px + drift + 2, s.y - 2, s.w - 5, 2);
+      }
+    }
   });
 
-  s.push('</svg>');
-  document.getElementById("mapHost").innerHTML = s.join("");
+  /* --- the ocean, which is where the first half of the course happens --- */
+  var seaEnd = Math.min(viewW, LAND_X - cam);
+  if(seaEnd > 0){
+    fill("#1f7fd0", 0, SURFACE, seaEnd, 8);
+    fill("#145a9e", 0, SURFACE + 8, seaEnd, 16);
+    fill("#0d3d72", 0, SURFACE + 24, seaEnd, VIEW_H - SURFACE - 24);
+    ditherRow("#145a9e", SURFACE + 7, cam);
+    ditherRow("#0d3d72", SURFACE + 23, cam);
+    for(x = 0; x < seaEnd; x += 7){
+      var bob = reduceMotion ? 0 : Math.round(Math.sin((x + cam + tick * 0.5) * 0.25));
+      fill("#7fd6ff", x, SURFACE + bob, 4, 1);
+    }
+  }
 
-  var cb = document.getElementById("cellsToggle");
-  var layer = document.getElementById("cellLayer");
-  if(cb && layer && cb.checked) layer.style.display = "";
+  /* --- the ground itself, one column at a time --- */
+  for(x = 0; x < viewW; x++){
+    wx = cam + x;
+    if(wx < 0 || wx > WORLD_W) continue;
+    g = Math.round(groundAt(wx));
 
-  Array.prototype.forEach.call(document.querySelectorAll(".pin"), function(g){
-    g.addEventListener("click", function(){ openStudy(g.getAttribute("data-study")); });
-    g.addEventListener("keydown", function(e){
-      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openStudy(g.getAttribute("data-study")); }
-    });
+    if(wx < LAND_X){
+      /* a floating deck of cloud, nine pixels thick */
+      fill("#ffffff", x, g,     1, 2);
+      fill("#c9b2f7", x, g + 2, 1, 3);
+      fill("#8f6ce0", x, g + 5, 1, 4);
+      if((wx + g) % 3 === 0) fill("#7a5ad0", x, g + 8, 1, 2);
+      continue;
+    }
+
+    /* solid earth: strata by absolute depth, so the rift walls read as layers */
+    fill("#8a4b2c", x, g, 1, VIEW_H - g);
+    var s1 = Math.max(g, 84), s2 = Math.max(g, 94), s3 = Math.max(g, 104);
+    if(s1 < VIEW_H) fill("#5c3320", x, s1, 1, VIEW_H - s1);
+    if(s2 < VIEW_H) fill("#3a1f13", x, s2, 1, VIEW_H - s2);
+    if(s3 < VIEW_H) fill("#c8391c", x, s3, 1, VIEW_H - s3);
+    if(s3 < VIEW_H && (wx + Math.floor(tick / 12)) % 5 === 0) fill("#ff9a2e", x, s3, 1, 2);
+
+    /* the surface edge, which gets hotter the deeper you have cut into it */
+    if(g <= SURFACE + 3){
+      fill("#57cc4a", x, g,     1, 3);
+      fill("#2f8f36", x, g + 3, 1, 2);
+      if(wx % 11 === 0) fill("#6fe05c", x, g - 2, 1, 2);
+    } else if(g <= 94){
+      fill("#a8613a", x, g, 1, 2);
+    } else {
+      fill("#d4512a", x, g, 1, 2);
+    }
+  }
+
+  /* magma bubbles, only where there is rock to hold them */
+  SCENERY.forEach(function(s){
+    if(s.t !== "bubble" || s.x < LAND_X) return;
+    var px = Math.round(s.x - cam);
+    if(px < 0 || px >= viewW) return;
+    var lift = reduceMotion ? 0 : Math.round(Math.sin(tick * 0.02 + s.x) * 2);
+    if(s.y + lift > groundAt(s.x)) fill("#ff9a2e", px, s.y + lift, 1, 1);
+  });
+
+  /* --- the hazards --- */
+  OBSTACLES.forEach(function(o){
+    var px = Math.round(o.x - cam);
+    if(px < -30 || px > viewW + 30) return;
+    drawHazard(o, px, hazardHeight(o));
+  });
+
+  /* --- a post under every stop, so the signpost above it is anchored --- */
+  STOPS.forEach(function(s){
+    var px = Math.round(s.x - cam);
+    if(px < -10 || px > viewW + 10) return;
+    var done = state.done[s.id] !== undefined;
+    fill("#3a2a18", px - 1, s.y - 15, 2, 15);
+    fill(done ? "#3fd97f" : s.colour, px - 3, s.y - 17, 6, 3);
+    if(s.kind === "finale"){
+      fill("#ffc63c", px - 4, s.y - 22, 8, 5);
+      fill("#120826", px - 1, s.y - 21, 2, 3);
+    }
+  });
+
+  /* --- the runner --- */
+  var hx = Math.round(hero.x - cam), hy = Math.round(hero.y);
+  var legs = hero.ground ? SPRITE_LEGS[hero.frame] : SPRITE_JUMP;
+  fill("rgba(18,8,38,.34)", hx - 4, hy - 1, 8, 1);
+  if(hero.bump > 0 && Math.floor(tick / 3) % 2 === 0) ctx.globalAlpha = 0.55;
+  drawSprite(hx - 4, hy - 11, legs, hero.dir);
+  ctx.globalAlpha = 1;
+}
+
+/* ----------------------------------------------------------------------------
+   Physics. Gravity, one jump, and hazards you cannot walk through.
+   ---------------------------------------------------------------------------- */
+var GRAV = 0.20, JUMP = -3.4, RUN = 2.4;
+var keys = {};
+
+function step(){
+  tick++;
+  if(hero.bump > 0) hero.bump--;
+
+  var move = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  if(move !== 0){ hero.dir = move; hero.walk += 0.22; }
+  hero.frame = move !== 0 ? (Math.floor(hero.walk) % 4) : 0;
+
+  var wanted = hero.x + move * RUN;
+  wanted = Math.max(10, Math.min(WORLD_W - 10, wanted));
+
+  /* Hazards are solid until you are over them. */
+  if(move !== 0){
+    for(var i = 0; i < OBSTACLES.length; i++){
+      var o = OBSTACLES[i], h = hazardHeight(o);
+      if(h <= 2) continue;
+      var oL = o.x - o.w / 2 - 4, oR = o.x + o.w / 2 + 4;
+      var clear = hero.y <= o.base - h;
+      if(clear) continue;
+      if(wanted > oL && wanted < oR && (hero.x <= oL || hero.x >= oR)){
+        wanted = hero.x <= oL ? oL : oR;
+        hero.bump = 12;
+      } else if(wanted > oL && wanted < oR){
+        wanted = move > 0 ? oL : oR;   // already inside: nudge back out
+        hero.bump = 12;
+      }
+    }
+  }
+  hero.x = wanted;
+
+  if(keys.jump && hero.ground){ hero.vy = JUMP; hero.ground = false; keys.jump = 0; }
+
+  var g = groundAt(hero.x);
+  if(hero.ground){
+    hero.y = g;
+  } else {
+    hero.vy += GRAV;
+    hero.y  += hero.vy;
+    if(hero.vy >= 0 && hero.y >= g){ hero.y = g; hero.vy = 0; hero.ground = true; }
+  }
+
+  var target = Math.max(0, Math.min(WORLD_W - viewW, hero.x - viewW / 2));
+  camX = reduceMotion ? target : camX + (target - camX) * 0.16;
+  if(Math.abs(target - camX) < 0.4) camX = target;
+}
+
+var running = false;
+function frame(){
+  if(!running) return;
+  step();
+  drawCourse();
+  placeMarkers();
+  requestAnimationFrame(frame);
+}
+function startLoop(){ if(!running){ running = true; requestAnimationFrame(frame); } }
+function stopLoop(){ running = false; }
+
+/* ----------------------------------------------------------------------------
+   Signposts. Drawn in HTML rather than on the canvas, so every stop is a real
+   button with real text: readable, focusable and reachable without the game.
+   ---------------------------------------------------------------------------- */
+var markerHost, markerEls = [];
+
+function stopState(s){
+  if(s.kind === "compare") return compareReady(s.pair) ? "open" : "locked";
+  if(s.kind === "finale")  return state.tokens >= FINALE.unlockAt ? "open" : "locked";
+  return "open";
+}
+function stopUnit(s){
+  return s.kind === "finale" ? null : unitById(s.id);
+}
+function stopStatus(s){
+  var earned = state.done[s.id];
+  if(s.kind === "finale"){
+    if(state.finaleDone) return "Complete";
+    return state.tokens >= FINALE.unlockAt
+      ? "Ready" : "◈ " + state.tokens + " / " + FINALE.unlockAt;
+  }
+  if(earned !== undefined) return "◈ " + earned + " earned";
+  if(stopState(s) === "locked") return "Locked";
+  var u = stopUnit(s);
+  return u ? u.qs.length + " × ◈ 3" : "";
+}
+
+function renderMarkers(){
+  markerHost.innerHTML = "";
+  markerEls = STOPS.map(function(s){
+    var b = el("button", "mark");
+    b.setAttribute("data-kind", s.kind);
+    b.style.setProperty("--pair", s.colour);
+    markerHost.appendChild(b);
+    updateMarker(b, s);
+    b.addEventListener("click", function(){ goTo(s); });
+    return b;
+  });
+  placeMarkers();
+}
+
+function updateMarker(b, s){
+  var done   = state.done[s.id] !== undefined || (s.kind === "finale" && state.finaleDone);
+  var locked = stopState(s) === "locked";
+  b.className = "mark" + (done ? " done" : "") + (locked ? " locked" : "");
+  b.disabled  = false;                    // locked stops still explain themselves
+  b.innerHTML =
+    '<span class="r">' + (s.kind === "study" ? '<i class="pip"></i>' : "") + esc(s.ref) + '</span>' +
+    '<span class="l">' + esc(s.label) + '</span>' +
+    '<span class="s">' + (done ? "✓ " : "") + esc(stopStatus(s)) + '</span>';
+  b.title = s.full + " — " + stopStatus(s);
+  b.setAttribute("aria-label", s.full + ". " + stopStatus(s) + (locked ? ". Locked." : ""));
+}
+
+function placeMarkers(){
+  var cam = Math.floor(camX), near = nearestStop();
+  for(var i = 0; i < STOPS.length; i++){
+    var s = STOPS[i], b = markerEls[i];
+    if(!b) continue;
+    var px = (s.x - cam) * PX;
+    if(px < -220 || px > viewW * PX + 220){ b.style.visibility = "hidden"; continue; }
+    b.style.visibility = "visible";
+    b.style.left = px + "px";
+    b.style.top  = ((s.y - 20) * PX) + "px";
+    var isNear = near === s;
+    if(isNear !== b.classList.contains("near")){
+      if(stopState(s) === "open" && state.done[s.id] === undefined) b.classList.toggle("near", isNear);
+      else b.classList.remove("near");
+    }
+  }
+  var w = document.getElementById("whereNow");
+  if(w){
+    var txt = near ? (stopState(near) === "locked"
+                        ? near.full + " — locked"
+                        : "At " + near.full + " · press ↵")
+                   : "";
+    if(w.textContent !== txt) w.textContent = txt;
+  }
+}
+
+function nearestStop(){
+  for(var i = 0; i < STOPS.length; i++)
+    if(Math.abs(STOPS[i].x - hero.x) < 26) return STOPS[i];
+  return null;
+}
+
+/* Walking the whole course is the game; clicking a signpost is the shortcut. */
+function goTo(s){
+  hero.x = s.x; hero.y = s.y; hero.vy = 0; hero.ground = true;
+  camX = Math.max(0, Math.min(WORLD_W - viewW, hero.x - viewW / 2));
+  openStop(s);
+}
+
+function openStop(s){
+  if(s.kind === "topic")   return openTopic(s.id);
+  if(s.kind === "study")   return openStudy(s.id);
+  if(s.kind === "compare"){
+    if(compareReady(s.pair)) return openCompare(s.id);
+    return flash(s, "Study both halves of the " + s.pair.name.toLowerCase() + " to open this comparison.");
+  }
+  if(s.kind === "finale"){
+    if(state.tokens >= FINALE.unlockAt) return openFinale();
+    return flash(s, "The finale needs ◈ " + FINALE.unlockAt +
+                    ". You have ◈ " + state.tokens + " — revise another topic to earn more.");
+  }
+}
+
+function flash(s, msg){
+  var w = document.getElementById("whereNow");
+  if(w){ w.textContent = msg; setTimeout(placeMarkers, 4200); }
+}
+
+/* ----------------------------------------------------------------------------
+   Input
+   ---------------------------------------------------------------------------- */
+function gameHasFocus(){
+  var a = document.activeElement;
+  return !a || a === document.body || stage.contains(a);
+}
+
+function bindInput(){
+  document.addEventListener("keydown", function(e){
+    if(!scrim.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    var a = document.activeElement;
+    if(a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA")) return;
+    if(!gameHasFocus()) return;
+    var k = e.key;
+    if(k === "ArrowLeft"  || k === "a" || k === "A"){ keys.left = 1;  e.preventDefault(); }
+    else if(k === "ArrowRight" || k === "d" || k === "D"){ keys.right = 1; e.preventDefault(); }
+    else if(k === "ArrowUp" || k === "w" || k === "W" || k === " "){
+      if(a === stage || a === document.body){ keys.jump = 1; e.preventDefault(); }
+    }
+    else if(k === "Enter"){
+      if(a === stage || a === document.body){
+        var s = nearestStop();
+        if(s){ e.preventDefault(); openStop(s); }
+      }
+    }
+  });
+  document.addEventListener("keyup", function(e){
+    var k = e.key;
+    if(k === "ArrowLeft"  || k === "a" || k === "A") keys.left = 0;
+    if(k === "ArrowRight" || k === "d" || k === "D") keys.right = 0;
+  });
+  window.addEventListener("blur", function(){ keys.left = keys.right = 0; });
+
+  /* touch pad — the only way to play without a keyboard */
+  Array.prototype.forEach.call(document.querySelectorAll(".pad button"), function(b){
+    var k = b.getAttribute("data-key");
+    var on  = function(e){ e.preventDefault(); keys[k] = 1; };
+    var off = function(e){ e.preventDefault(); if(k !== "jump") keys[k] = 0; };
+    b.addEventListener("pointerdown", on);
+    b.addEventListener("pointerup", off);
+    b.addEventListener("pointercancel", off);
+    b.addEventListener("pointerleave", off);
+  });
+  if(window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
+    document.body.classList.add("touch");
+
+  stage.addEventListener("pointerdown", function(){ stage.focus({ preventScroll:true }); });
+
+  var resizeTimer = null;
+  window.addEventListener("resize", function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){ sizeCanvas(); drawCourse(); placeMarkers(); }, 120);
+  });
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden) stopLoop(); else if(scrim.hidden) startLoop();
   });
 }
 
 /* ============================================================================
-   6. SHELL RENDERING
+   5. SHELL RENDERING
    ============================================================================ */
 
 function renderHud(){
   document.getElementById("tokCount").textContent = state.tokens;
   var studies = allStudies();
-  document.getElementById("topicCount").textContent =
-    doneIn(TOPICS) + " / " + TOPICS.length + " topics · " +
-    doneIn(studies) + " / " + studies.length + " case studies";
+  document.getElementById("topicCount").innerHTML =
+    '<span><b>' + doneIn(TOPICS) + '</b> / ' + TOPICS.length + ' topics</span>' +
+    '<span><b>' + doneIn(studies) + '</b> / ' + studies.length + ' case studies</span>';
+
   var note = document.getElementById("unlockNote");
-  if(state.finaleDone)            note.textContent = "Level 1 complete";
-  else if(state.tokens >= FINALE.unlockAt) note.textContent = "Finale unlocked";
-  else                            note.textContent = (FINALE.unlockAt - state.tokens) + " more tokens to unlock finale";
+  var ready = state.tokens >= FINALE.unlockAt;
+  note.className = "note" + (ready ? " ready" : "");
+  if(state.finaleDone)  note.textContent = "Level 1 complete";
+  else if(ready)        note.textContent = "Finale unlocked";
+  else                  note.textContent = "◈ " + (FINALE.unlockAt - state.tokens) + " to the finale";
 }
 
-function renderRail(){
-  var rail = document.getElementById("rail");
-  rail.innerHTML = "";
+function renderTabs(){
+  var host = document.getElementById("tabs");
+  host.innerHTML = "";
   LEVELS.forEach(function(l){
-    var cls = "lvl" + (l.live ? (state.finaleDone ? " done" : " active") : "");
-    var n = el("div", cls,
-      '<div class="no">Level '+l.n+(l.live?"":" · locked")+'</div>'+
-      '<div class="nm">'+esc(l.name)+'</div>');
-    n.title = l.comp + (l.live ? "" : " — unlocks after Level 1");
-    rail.appendChild(n);
+    var t = el("div", "tab" + (l.live ? " live" : " locked"),
+      '<span class="n">' + l.n + '</span>' + esc(l.name));
+    t.title = l.comp + (l.live ? "" : " — unlocks after Level 1");
+    host.appendChild(t);
   });
+}
+
+/* The depth ruler says out loud what the level geometry already implies. */
+function renderRuler(){
+  var host = document.getElementById("ruler");
+  host.innerHTML = "";
+  [[16, "UPPER ATMOSPHERE"], [56, "STORM BAND"], [SURFACE + 5, "SURFACE"],
+   [92, "CRUST"], [107, "MANTLE"]].forEach(function(r){
+    var s = el("span", null, r[1]);
+    s.style.top = (r[0] * PX) + "px";
+    host.appendChild(s);
+  });
+}
+
+function row(opts){
+  var b = el("button", "row" + (opts.done ? " done" : ""),
+    '<span class="ref">' + esc(opts.ref) + '</span>' +
+    (opts.colour ? '<span class="pip"></span>' : '') +
+    '<span class="nm"><b>' + esc(opts.name) + '</b><i>' + esc(opts.sub) + '</i></span>' +
+    '<span class="st' + (opts.locked ? ' locked' : '') + '">' + esc(opts.status) + '</span>');
+  if(opts.colour) b.style.setProperty("--pair", opts.colour);
+  b.disabled = !!opts.disabled;
+  if(!opts.disabled) b.addEventListener("click", opts.fn);
+  return b;
 }
 
 function renderTopics(){
   var host = document.getElementById("topicList");
   host.innerHTML = "";
-  TOPICS.forEach(function(topic){
-    var earned = state.done[topic.id];
-    var b = el("button", "site" + (earned !== undefined ? " done" : ""),
-      '<div class="st">Topic '+esc(topic.ref)+'</div>'+
-      '<div class="sn">'+esc(topic.name)+'</div>'+
-      '<div class="sd">'+esc(topic.theme)+'</div>'+
-      '<div class="sc">'+(earned !== undefined
-          ? "Revised · ◈ " + earned + " earned"
-          : topic.qs.length + " challenges · up to ◈ " + (topic.qs.length*3))+'</div>');
-    b.addEventListener("click", function(){ openTopic(topic.id); });
-    host.appendChild(b);
+  TOPICS.forEach(function(t, i){
+    var earned = state.done[t.id];
+    host.appendChild(row({
+      ref:t.ref, name:t.name, sub:t.theme, done:earned !== undefined,
+      status:earned !== undefined ? "◈ " + earned + " earned"
+                                  : t.qs.length + " challenges · up to ◈ " + (t.qs.length * 3),
+      fn:function(){ goTo(STOPS[i]); }
+    }));
   });
 }
 
-/* Two linked pairs. Each pair shows its two case studies side by side, with the
-   comparison beneath — locked until both halves have been done at least once. */
 function renderCases(){
   var host = document.getElementById("caseList");
   host.innerHTML = "";
-
+  var at = TOPICS.length;
   PAIRS.forEach(function(pr){
-    var card = el("div","pair");
-    card.style.setProperty("--pair", pr.colour);
-
-    card.appendChild(el("div","pairhead",
-      '<div class="pl"><i></i>'+esc(pr.name)+'</div>'+
-      '<div class="pn">'+esc(pr.sub)+'</div>'));
-
-    var row = el("div","pairrow");
     pr.studies.forEach(function(st){
-      var earned = state.done[st.id];
-      var b = el("button","cs" + (earned !== undefined ? " done" : ""),
-        '<div class="st">'+esc(st.sub)+'</div>'+
-        '<div class="sn">'+esc(st.name)+'</div>'+
-        '<div class="sc">'+(earned !== undefined
-            ? "Studied · ◈ " + earned + " earned"
-            : st.qs.length + " challenges · up to ◈ " + (st.qs.length*3))+'</div>');
-      b.addEventListener("click", function(){ openStudy(st.id); });
-      row.appendChild(b);
+      var idx = at++, earned = state.done[st.id];
+      host.appendChild(row({
+        ref:"Case", colour:pr.colour, name:st.name, sub:st.sub + " · " + pr.name,
+        done:earned !== undefined,
+        status:earned !== undefined ? "◈ " + earned + " earned"
+                                    : st.qs.length + " challenges · up to ◈ " + (st.qs.length * 3),
+        fn:function(){ goTo(STOPS[idx]); }
+      }));
     });
-    card.appendChild(row);
-
-    var cmp    = pr.compare;
-    var ready  = compareReady(pr);
-    var earned = state.done[cmp.id];
-    var link = el("button","cmp" + (ready ? "" : " locked") + (earned !== undefined ? " done" : ""),
-      '<div class="ct">'+esc(cmp.name)+'</div>'+
-      '<div class="cd">'+(ready
-          ? (earned !== undefined
-              ? "Compared · ◈ " + earned + " earned"
-              : cmp.qs.length + " challenges · up to ◈ " + (cmp.qs.length*3))
-          : "Study both case studies above to unlock the comparison")+'</div>');
-    link.disabled = !ready;
-    if(ready) link.addEventListener("click", function(){ openCompare(cmp.id); });
-    card.appendChild(link);
-
-    host.appendChild(card);
+    var cIdx = at++, cmp = pr.compare, ready = compareReady(pr), cEarned = state.done[cmp.id];
+    host.appendChild(row({
+      ref:"vs", colour:pr.colour, name:cmp.name,
+      sub:ready ? "What the pairing proves, once you hold both studies in your head"
+                : "Opens when both halves of the " + pr.name.toLowerCase() + " are done",
+      done:cEarned !== undefined, locked:!ready, disabled:!ready,
+      status:cEarned !== undefined ? "◈ " + cEarned + " earned"
+           : ready ? cmp.qs.length + " challenges · up to ◈ " + (cmp.qs.length * 3)
+                   : "Locked",
+      fn:function(){ goTo(STOPS[cIdx]); }
+    }));
   });
 }
 
@@ -1991,30 +2578,38 @@ function renderFinaleCard(){
 
   if(state.finaleDone && state.finaleResult){
     card.innerHTML =
-      '<div class="ft"><h3>Level 1 complete — '+esc(state.finaleResult.tier)+'</h3>'+
-      '<p>Your management plan saved lives in the simulated event. Replay the finale to try a different allocation, '+
-      'or revise any topic again to earn more tokens first.</p></div>';
-    var again = el("button","btn primary","Replay finale");
+      '<div class="ft"><h3>LEVEL 1 COMPLETE — ' + esc(state.finaleResult.tier.toUpperCase()) + '</h3>' +
+      '<p>Your management plan saved lives in the simulated event. Run the finale again to try a ' +
+      'different allocation, or revise any topic to earn more tokens first.</p></div>';
+    var again = el("button", "btn primary", "Run the finale again");
     again.addEventListener("click", openFinale);
     card.appendChild(again);
     return;
   }
 
   card.innerHTML =
-    '<div class="ft"><h3>Level finale — '+esc(FINALE.title)+'</h3>'+
-    '<p>Spend your tokens as a hazard-management budget, then live with the consequences. '+
-    'You need ◈ '+FINALE.unlockAt+' to begin — the more you bring, the more of the region you can protect.</p>'+
-    '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
-  var go = el("button","btn primary", ready ? "Begin the finale" : "◈ "+state.tokens+" / "+FINALE.unlockAt);
+    '<div class="ft"><h3>LEVEL FINALE — ' + esc(FINALE.title.toUpperCase()) + '</h3>' +
+    '<p>Spend your tokens as a hazard-management budget, then live with the consequences. ' +
+    'It takes ◈ ' + FINALE.unlockAt + ' to begin, and the more you bring the more of the region ' +
+    'you can protect.</p>' +
+    '<div class="bar"><i style="width:' + pct + '%"></i></div></div>';
+  var go = el("button", "btn primary", ready ? "Begin the finale" : "◈ " + state.tokens + " / " + FINALE.unlockAt);
   go.disabled = !ready;
   go.addEventListener("click", openFinale);
   card.appendChild(go);
 }
 
-function renderAll(){ renderHud(); renderRail(); renderCases(); renderTopics(); renderFinaleCard(); buildMap(); }
+function renderAll(){
+  renderHud();
+  renderTabs();
+  renderCases();
+  renderTopics();
+  renderFinaleCard();
+  for(var i = 0; i < STOPS.length; i++) if(markerEls[i]) updateMarker(markerEls[i], STOPS[i]);
+}
 
 /* ============================================================================
-   7. MODAL PLUMBING
+   6. MODAL PLUMBING
    ============================================================================ */
 
 var scrim = document.getElementById("scrim");
@@ -2027,8 +2622,14 @@ function openModal(loc, title){
   document.getElementById("mFoot").innerHTML    = "";
   scrim.hidden = false;
   scrim.scrollTop = 0;
+  stopLoop();
 }
-function closeModal(){ scrim.hidden = true; renderAll(); }
+function closeModal(){
+  scrim.hidden = true;
+  renderAll();
+  stage.focus({ preventScroll:true });
+  startLoop();
+}
 
 document.getElementById("mClose").addEventListener("click", closeModal);
 scrim.addEventListener("click", function(e){ if(e.target === scrim) closeModal(); });
@@ -2047,7 +2648,7 @@ function foot(buttons){
 }
 
 /* ============================================================================
-   8. CHALLENGE ENGINE
+   7. CHALLENGE ENGINE
    Scoring: right first time = 3 tokens · after a hint = 2 · after a retry = 1
    ============================================================================ */
 
@@ -2282,7 +2883,7 @@ function chartHtml(c){
       var pct = Math.max(2, Math.round(s.value / max * 100));
       h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
              '<div style="flex:0 0 40%;font-size:12.5px;color:var(--muted)">'+esc(s.label)+'</div>'+
-             '<div style="flex:1;height:16px;background:#132340;border-radius:5px;overflow:hidden">'+
+             '<div style="flex:1;height:16px;background:#ded6f5;border-radius:5px;overflow:hidden">'+
                '<i style="display:block;height:100%;width:'+pct+'%;background:'+s.colour+'"></i></div>'+
              '<div style="flex:0 0 68px;text-align:right;font-weight:700;font-size:12.5px;'+
                   'font-variant-numeric:tabular-nums">'+esc(s.display)+'</div>'+
@@ -2304,13 +2905,13 @@ function chartHtml(c){
     for(i = 0; i <= 4; i++){                       // horizontal gridlines
       v = c.ymin + (c.ymax - c.ymin) * i / 4;
       h += '<line x1="'+L+'" y1="'+py(v).toFixed(1)+'" x2="'+R+'" y2="'+py(v).toFixed(1)+
-           '" stroke="#1d2c46" stroke-width="1"/>'+
-           '<text x="'+(L-8)+'" y="'+(py(v)+4).toFixed(1)+'" fill="#6b7f9e" font-size="10" text-anchor="end">'+
+           '" stroke="#c4bde0" stroke-width="1"/>'+
+           '<text x="'+(L-8)+'" y="'+(py(v)+4).toFixed(1)+'" fill="#5c5480" font-size="10" text-anchor="end">'+
            Math.round(v)+'</text>';
     }
     for(i = 0; i <= 4; i++){                       // x-axis ticks
       v = c.xmin + (c.xmax - c.xmin) * i / 4;
-      h += '<text x="'+px(v).toFixed(1)+'" y="'+(B+18)+'" fill="#6b7f9e" font-size="10" text-anchor="middle">'+
+      h += '<text x="'+px(v).toFixed(1)+'" y="'+(B+18)+'" fill="#5c5480" font-size="10" text-anchor="middle">'+
            Math.round(v)+'</text>';
     }
     c.series.forEach(function(s){
@@ -2320,9 +2921,9 @@ function chartHtml(c){
       h += '<path d="'+d+'" fill="none" stroke="'+s.colour+'" stroke-width="2" '+
            'stroke-linejoin="round" stroke-linecap="round"/>';
     });
-    h += '<text x="'+((L+R)/2)+'" y="'+(H-4)+'" fill="#6b7f9e" font-size="10.5" text-anchor="middle">'+
+    h += '<text x="'+((L+R)/2)+'" y="'+(H-4)+'" fill="#5c5480" font-size="10.5" text-anchor="middle">'+
          esc(c.xlab)+'</text>';
-    h += '<text x="14" y="'+((T+B)/2)+'" fill="#6b7f9e" font-size="10.5" text-anchor="middle" '+
+    h += '<text x="14" y="'+((T+B)/2)+'" fill="#5c5480" font-size="10.5" text-anchor="middle" '+
          'transform="rotate(-90 14 '+((T+B)/2)+')">'+esc(c.ylab)+'</text>';
     h += '</svg>';
   }
@@ -2647,7 +3248,7 @@ function levelsScheme(q){
 }
 
 /* ============================================================================
-   9. DIAGRAMS
+   8. DIAGRAMS
    ============================================================================ */
 
 var DIAGRAMS = {
@@ -2749,7 +3350,7 @@ var DIAGRAMS = {
 };
 
 /* ============================================================================
-   10. THE FINALE
+   9. THE FINALE
    ============================================================================ */
 
 function openFinale(){
@@ -2803,7 +3404,7 @@ function openFinale(){
       body.appendChild(cat);
     });
 
-    foot([ { label:"Back to the map", fn:closeModal, ghost:true }, null,
+    foot([ { label:"Back to the course", fn:closeModal, ghost:true }, null,
            { label:"Commit the plan", primary:true, disabled:spent === 0,
              fn:function(){ resolve(bought, spent, budget); } } ]);
   }
@@ -2899,28 +3500,37 @@ function resolve(bought, spent, budget){
   save();
 
   foot([ { label:"Try a different plan", ghost:true, fn:openFinale }, null,
-         { label:"Back to the map", primary:true, fn:closeModal } ]);
+         { label:"Back to the course", primary:true, fn:closeModal } ]);
 }
 
 /* ============================================================================
-   11. BOOT
+   10. BOOT
    ============================================================================ */
 
-document.getElementById("cellsToggle").addEventListener("change", function(e){
-  var layer = document.getElementById("cellLayer");
-  if(layer) layer.style.display = e.target.checked ? "" : "none";
-});
+stage       = document.getElementById("stage");
+cv          = document.getElementById("world");
+markerHost  = document.getElementById("markers");
 
 document.getElementById("resetBtn").addEventListener("click", function(){
   if(!confirm("Wipe all progress and start Level 1 again?")) return;
   state = { tokens:0, done:{}, finaleDone:false, finaleResult:null };
   save();
+  hero.x = STOPS[0].x; hero.y = STOPS[0].y; hero.vy = 0; hero.ground = true;
+  camX = 0;
   renderAll();
-  document.getElementById("cellsToggle").checked = false;
 });
 
 load();
+buildCourse();
+sizeCanvas();
+renderRuler();
+renderMarkers();
 renderAll();
+bindInput();
+hero.x = STOPS[0].x;
+hero.y = STOPS[0].y;
+camX   = Math.max(0, Math.min(WORLD_W - viewW, hero.x - viewW / 2));
+startLoop();
 
 </script>
 </body>

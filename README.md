@@ -3,9 +3,11 @@
 A revision game for **Edexcel GCSE Geography B (Investigating Geographical Issues)**.
 
 Revision is split into two separate halves: the **topics** of the specification,
-tested as concepts, and four **case studies** pinned on a real world map, learnt
-in two linked pairs. Completing challenges earns **tokens**, which you then spend
-as a hazard-management budget in the level finale.
+tested as concepts, and four **case studies** learnt in two linked pairs.
+Completing challenges earns **tokens**, which you then spend as a
+hazard-management budget in the level finale.
+
+You move between them by running and jumping along a side-scrolling course.
 
 **Level 1 — Hazardous Earth** (Component 1, Topic 1) is fully playable.
 
@@ -15,6 +17,34 @@ Open `index.html` in any browser. That's it — no install, no build step, no
 internet connection required. It is a single self-contained file.
 
 ## How it works
+
+### The course is a cross-section of the Earth
+
+The level is not a menu. It is a cutaway of the hazardous Earth, scrolling left
+to right, and **height on screen means what it says**. The run starts on a cloud
+deck high in the atmosphere, drops through the storm band to the coast where
+people live, descends into a rift cut through the crust, climbs back out to the
+surface, and ends at the field stations where the case studies are.
+
+Topics sit along it **in specification order**, at the depth they belong to:
+
+```
+  1.1  1.2                                        UPPER ATMOSPHERE
+            1.3                                   STORM BAND
+                  1.4              1.7  CS CS CS  SURFACE
+                        1.5                       CRUST
+                              1.6                 MANTLE
+```
+
+Between each stop and the next stands one hazard, and it is the hazard the topic
+behind it has just taught: a jet-stream gust, an ice-age cold snap, a cyclone
+eyewall, collapsed masonry, a fault scarp, a lava spurt that rises and falls on a
+timer, a tsunami surge. You jump them.
+
+`←` `→` run · `↑` jump · `↵` opens the stop you are standing at. Clicking a
+signpost takes you straight there, and the course index below the world does the
+same thing for anyone who would rather not platform — nothing is reachable only
+by jumping.
 
 ### Topics and case studies are separate
 
@@ -50,9 +80,8 @@ Ida and Haiyan are the only two tropical cyclones named anywhere in the game.
 No other storm is used for comparison, so everything you are asked about a
 hurricane is answerable from these two case studies alone.
 
-The map pins the four case studies at their true coordinates, colour-coded by
-pair, and still draws the plate boundaries by type and overlays the atmospheric
-circulation cells. Click a pin to open that case study.
+The four case studies sit at the end of the course, after 1.7, colour-coded by
+pair.
 
 **Six challenge formats**, so it never becomes one long multiple-choice test:
 multiple choice, sequencing, matching pairs, labelling a diagram, data response,
@@ -98,7 +127,7 @@ Progress saves automatically in your browser. **Reset** wipes it.
 ## Adding or editing questions
 
 All content lives in one place near the top of `index.html`, under
-`2. GAME CONTENT`. You never need to touch the engine code below it.
+`1. GAME CONTENT`. You never need to touch the engine code below it.
 
 There are two arrays, matching the two halves of the game.
 
@@ -106,6 +135,7 @@ There are two arrays, matching the two halves of the game.
 
 ```js
 { id:"cyclones", ref:"1.3", name:"Tropical cyclones: formation and structure",
+  short:"Cyclones",                     // the label on the signpost in the world
   theme:"One line shown on the topic card",
   brief:"The paragraph shown before the first challenge.",
   keys:["Chips","Shown","Under","The brief"],
@@ -119,9 +149,8 @@ There are two arrays, matching the two halves of the game.
 { id:"tectonic", name:"Tectonic pair", colour:"#b98cff",
   sub:"One line shown under the pair title",
   studies:[
-    { id:"tohoku", short:"Tōhoku",          // `short` is the map pin label
+    { id:"tohoku", short:"Tōhoku",          // `short` is the signpost label
       name:"Tōhoku, Japan", sub:"Earthquake and tsunami, 2011",
-      lon:142.40, lat:38.30,                // real coordinates place the pin
       brief:"…", facts:["11 March 2011","Magnitude 9.0"],
       qs:[ /* … */ ] },
     { /* the second study */ }
@@ -146,7 +175,7 @@ The other formats:
 - `{ t:"order", q, items:[...] }` — `items` in the **correct** order; the game shuffles them.
 - `{ t:"match", q, pairs:[[term, meaning], ...] }`
 - `{ t:"label", q, diagram:"cyclone"|"destructive", targets:[{id, prompt}] }` —
-  `id` must match a `data-id` on a hotspot in that diagram (see `9. DIAGRAMS`).
+  `id` must match a `data-id` on a hotspot in that diagram (see `8. DIAGRAMS`).
 - `{ t:"data", chart:{...}, q, opts, a }` — `chart.kind` is `"bars"`, `"table"` or `"line"`.
 - `{ t:"exam", marks:4, q, guidance, scheme:[{p, r}, ...] }` — point-marked.
   `p` is the point (1 mark), `r` is the reason that develops it (1 further mark).
@@ -157,8 +186,10 @@ The other formats:
 
 Every question needs a `why`. That explanation is the point of the game.
 
-To move a map pin, change `lon` and `lat` to the real coordinates — the
-projection places it automatically.
+Stops are laid out along the course automatically, in the order they appear in
+`TOPICS` and then `PAIRS`, so adding a topic extends the level. How deep each
+topic sits is one number in `TOPIC_DEPTH`, and the hazard standing after it is
+one name in `GAP_HAZARD` — both at the top of `4. THE COURSE`.
 
 ## Levels 2–9
 
@@ -166,7 +197,7 @@ The level rail shows all nine topics of the specification. Only Level 1 is built
 The remaining eight follow the same structure: split the level into its
 specification sub-topics for `TOPICS`, choose linked pairs of contrasting case
 studies for `PAIRS`, and add a finale that spends tokens on a decision relevant
-to that level.
+to that level. The course rebuilds itself around whatever those arrays contain.
 
 ## Accuracy
 
