@@ -510,6 +510,8 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 .scrim .budget,.scrim .stat,.scrim .chart,.scrim textarea.exam{border-width:2px}
 .scrim .opt:hover:not(:disabled),.scrim .seq .step:hover:not(:disabled),
 .scrim .mi:hover:not(:disabled),.scrim .buy:hover:not(:disabled){background:var(--edge-soft)}
+.scrim .btn.primary{background:#22c9a8;color:#04322a}
+.scrim .btn.primary:hover:not(:disabled){background:#4fe0c2}
 .scrim .opt .k{font-family:var(--mono);color:#6a4fd8}
 .scrim .seq .num{font-family:var(--mono)}
 .scrim .fb.ok{background:#dcf7e6;border-color:var(--good)}
@@ -538,11 +540,60 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
 .scrim .hot.got{fill:rgba(63,217,127,.28);stroke:#3fd97f}
 .scrim .hot.miss{fill:rgba(255,90,74,.28);stroke:#ff5a4a}
 
+/* ============================================================
+   THE SIGNPOST DIALOG
+   Walk up to a stop and it opens a window at you, in the manner
+   of the desktop the rest of this course is drawn on.
+   ============================================================ */
+.dlg{
+  position:absolute;transform:translate(-50%,-100%);
+  width:238px;pointer-events:auto;text-align:left;
+  background:#9fb0c4;
+  border:3px solid #120826;
+  box-shadow:0 0 0 3px #ded9f0, 7px 9px 0 rgba(12,5,28,.55);
+}
+.dlg[hidden]{display:none}
+.dlgbar{
+  display:flex;align-items:center;gap:4px;
+  padding:4px 4px 4px 8px;background:#2b3fd0;border-bottom:3px solid #120826;
+}
+.dlgbar .dt{
+  margin-right:auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font:700 11px/1.4 var(--mono);letter-spacing:.11em;color:#fff;
+}
+.dlgbar i,.dlgbar .dx{
+  width:16px;height:14px;flex:none;display:grid;place-items:center;
+  background:#cfcbe0;border:2px solid #120826;
+  box-shadow:inset -1px -1px 0 #8a86a3,inset 1px 1px 0 #fff;
+  font:700 8px/1 var(--mono);font-style:normal;color:#120826;padding:0;
+}
+.dlgbar .dx:hover{background:#fff}
+.dlgbody{padding:12px 13px 13px}
+.dlgbody .dq{margin:0;font:600 13.5px/1.35 var(--sans);color:#0e1728}
+.dlgbody .dm{margin:6px 0 0;font:11px/1.45 var(--mono);color:#31405e}
+.dgo{
+  display:block;margin:12px auto 2px;padding:5px 18px;
+  background:#cfcbe0;border:3px solid #120826;
+  box-shadow:4px 4px 0 rgba(12,5,28,.5);
+  font:700 12px/1.3 var(--mono);letter-spacing:.09em;color:#120826;
+  text-decoration:underline;
+}
+.dgo:hover:not(:disabled){background:#fff}
+.dgo:active:not(:disabled){box-shadow:1px 1px 0 rgba(12,5,28,.5);transform:translate(3px,3px)}
+.dgo:disabled{opacity:.5;cursor:not-allowed;text-decoration:none;box-shadow:none}
+.dlg.done{background:#a4c4ad}
+.dlg.done .dlgbar{background:#0d7a44}
+.dlg.locked .dlgbar{background:#5c5480}
+@media (max-width:760px){ .dlg{width:196px} .dlgbody .dq{font-size:12.5px} }
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
 @media (max-width:760px){
   .wrap{padding:12px 10px 40px}
+  .status .note{margin-left:0}
+  .ctrl{font-size:10.5px;line-height:1.8}
+  .ctrl .sp{margin-left:0;flex-basis:100%}
   canvas#world{height:340px}
   .ruler span{font-size:8.5px}
   .titlebar .tsub{display:none}
@@ -585,7 +636,9 @@ textarea.exam:focus{outline:0;border-color:var(--tok)}
          aria-label="The Hazardous Earth course — run and jump between topics, or use the course index below">
       <canvas id="world"></canvas>
       <div class="ruler" id="ruler" aria-hidden="true"></div>
-      <div class="markers" id="markers"></div>
+      <div class="markers" id="markers">
+        <div class="dlg" id="nearBox" hidden></div>
+      </div>
       <div class="pad" aria-hidden="true">
         <button data-key="left"  aria-label="Run left">◄</button>
         <button data-key="right" aria-label="Run right">►</button>
@@ -1902,13 +1955,13 @@ function shuffle(a){
 var PX      = 4;      // one drawn pixel, in screen pixels
 var VIEW_H  = 112;    // drawn height — 448 screen pixels
 var SURFACE = 74;     // sea level: the ground line people live on
-var STEP    = 152;    // distance between one stop and the next
-var FLAT    = 48;     // half-width of the level ground at each stop
+var STEP    = 118;    // distance between one stop and the next
+var FLAT    = 38;     // half-width of the level ground at each stop
 
 /* Where each topic sits in the Earth system, in order. 1.1 is high in the
    atmosphere; 1.5 and 1.6 are inside the crust; 1.7 comes back to the surface,
    because managing a hazard is something you do where the people are. */
-var TOPIC_DEPTH = [28, 42, 56, SURFACE, 88, 100, SURFACE];
+var TOPIC_DEPTH = [38, 48, 60, SURFACE, 88, 100, SURFACE];
 
 /* The hazard standing between each stop and the next. These are the obstacles
    you jump, and each one is the hazard the topic behind it has just taught. */
@@ -1925,7 +1978,7 @@ var HAZARD = {
   wave:  { w:19, h:14, name:"Tsunami surge" }
 };
 
-var STOPS = [], TERRAIN = [], OBSTACLES = [], SCENERY = [];
+var STOPS = [], TERRAIN = [], OBSTACLES = [], SCENERY = [], LANDMARKS = [];
 var WORLD_W = 0, LAND_X = 0;
 
 var reduceMotion = window.matchMedia &&
@@ -1989,45 +2042,214 @@ function groundAt(x){
   return TERRAIN[TERRAIN.length - 1].y;
 }
 
-/* Scattered once, then only ever redrawn. */
+/* Scenery is scattered once and then only ever redrawn. The landmarks are
+   placed against the stops they belong to, so each one is standing where its
+   topic is taught. */
 function buildScenery(){
   SCENERY = [];
   var i;
-  for(i = 0; i < 90; i++)                      // stars, high and thin
-    SCENERY.push({ t:"star", x:rnd(i) * WORLD_W, y:2 + rnd(i + 900) * 24, p:0.25 });
-  for(i = 0; i < 34; i++)                      // cloud banks, drifting layer
+  for(i = 0; i < 110; i++)                     // stars, high and thin
+    SCENERY.push({ t:"star", x:rnd(i) * WORLD_W, y:2 + rnd(i + 900) * 26, p:0.25 });
+  for(i = 0; i < 26; i++)                      // cirrus, drawn as bare streaks
+    SCENERY.push({ t:"cirrus", x:rnd(i + 17) * WORLD_W, y:10 + rnd(i + 610) * 22,
+                   w:14 + Math.floor(rnd(i + 720) * 26), p:0.3 });
+  for(i = 0; i < 40; i++)                      // cloud banks
     SCENERY.push({ t:"cloud", x:rnd(i + 40) * WORLD_W, y:30 + rnd(i + 300) * 30,
                    w:12 + Math.floor(rnd(i + 500) * 18), p:0.45 });
-  for(i = 0; i < 60; i++)                      // magma bubbles, deep
+  for(i = 0; i < 70; i++)                      // magma bubbles, deep
     SCENERY.push({ t:"bubble", x:rnd(i + 70) * WORLD_W, y:98 + rnd(i + 200) * 12, p:0.8 });
+
+  LANDMARKS = [
+    { t:"rainbow", x:STOPS[0].x + 46 },        // 1.1 — the atmosphere, doing optics
+    { t:"storm",   x:STOPS[2].x },             // 1.3 — the cyclone itself, in section
+    { t:"town",    x:STOPS[3].x + 4 },         // 1.4 — the people a hazard happens to
+    { t:"plates",  x:STOPS[4].x },             // 1.5 — two plates, converging
+    { t:"volcano", x:STOPS[6].x - 34 }         // 1.7 — the thing being managed
+  ];
+  PAIRS.forEach(function(pr){
+    pr.studies.forEach(function(st){
+      var s = stopById(st.id);
+      if(s) LANDMARKS.push({ t:"camp", x:s.x + 22, colour:pr.colour });
+    });
+  });
+  LANDMARKS.push({ t:"gate", x:STOPS[STOPS.length - 1].x + 40 });
+}
+
+function stopById(id){
+  for(var i = 0; i < STOPS.length; i++) if(STOPS[i].id === id) return STOPS[i];
+  return null;
 }
 
 /* ----------------------------------------------------------------------------
-   The runner. Eleven pixels tall, in a hard hat, because everyone in this
-   level is doing field work on something that is trying to kill them.
+   The runner. Fourteen pixels tall, in a hard hat and a hi-vis jacket, because
+   everyone in this level is doing field work on something that is trying to
+   kill them. Outlined in near-black so the silhouette survives a busy sky.
    ---------------------------------------------------------------------------- */
-var SPRITE_PAL = { H:"#ffc63c", h:"#c98f00", S:"#ffd0a4", B:"#2a1436",
-                   J:"#ff6b2e", j:"#c4400d", W:"#fff2d6", P:"#2f47a8", K:"#171038" };
+var SPRITE_PAL = { H:"#ffc63c", h:"#b87d00", S:"#ffdcb8", B:"#1a0a2e",
+                   J:"#ff7a33", j:"#c4400d", W:"#fff6d0", P:"#3552c4",
+                   K:"#1a1240", o:"#25103f", G:"#ffe89a" };
 var SPRITE_TOP = [
-  "..HHHH..",
-  ".hHHHHh.",
-  "..SSSS..",
-  "..BSSB..",
-  "..SSSS..",
-  ".WJJJJW.",
-  "SJJJJJJS",
-  ".jJJJJj."
+  "...HHHH...",
+  "..HHHHHH..",
+  ".HGHHHHHH.",
+  "hhhhhhhhhh",
+  "..oSSSSo..",
+  "..BSSSSB..",
+  "..oSSSSo..",
+  "...oSSo...",
+  ".WJJJJJJW.",
+  "SJJJJJJJJS",
+  ".jJWWWWJj."
 ];
 var SPRITE_LEGS = [
-  ["..PPPP..", "..P..P..", "..K..K.."],   // stand
-  ["..PPPP..", "..PP.P..", ".KK...K."],   // run, left leg forward
-  ["..PPPP..", "..P..P..", "...KK..."],   // pass
-  ["..PPPP..", "..P.PP..", ".K...KK."]    // run, right leg forward
+  ["..PPPPPP..", "..PP..PP..", ".KK....KK."],   // standing
+  ["..PPPPPP..", ".PPP...PP.", "KKK.....KK"],   // left leg forward
+  ["..PPPPPP..", "..PPPP....", "..KKK....."],   // passing
+  ["..PPPPPP..", ".PP...PPP.", "KK.....KKK"]    // right leg forward
 ];
-var SPRITE_JUMP = ["..PPPP..", ".PP..PP.", ".K....K."];
+var SPRITE_JUMP = ["..PPPPPP..", ".PP....PP.", "KK......KK"];
+var HERO_H = 14;
 
 var hero = { x:86, y:TOPIC_DEPTH[0], vy:0, dir:1, ground:true, frame:0, walk:0, bump:0 };
 var camX = 0, tick = 0;
+
+/* ----------------------------------------------------------------------------
+   Landmarks. Everything here is plotted a pixel at a time rather than stroked,
+   because a canvas arc would arrive anti-aliased and the whole point is that
+   nothing on this course has a soft edge.
+   ---------------------------------------------------------------------------- */
+function drawRainbow(cx, cam){
+  var cols = ["#ff5a4a","#ff9a2e","#ffc63c","#57cc4a","#3fd3ef","#5b3fd6","#b34fd8"];
+  for(var b = 0; b < cols.length; b++){
+    var r = 11 + b * 2;
+    ctx.fillStyle = cols[b];
+    for(var dx = -r; dx <= r; dx++){
+      var sx = Math.round(cx - cam + dx);
+      if(sx < 0 || sx >= viewW) continue;
+      var y = Math.round(SURFACE - Math.sqrt(r * r - dx * dx));
+      if(y < 2 || y > SURFACE) continue;
+      ctx.fillRect(sx, y, 1, 2);
+    }
+  }
+}
+
+/* A cyclone in cross-section: the anvil spreading at the tropopause where the
+   rising air can go no higher, the tower beneath it, and the rain coming out of
+   the bottom. The rain is drawn later, in front of the cloud deck, because that
+   is where rain goes. */
+function drawStorm(cx, cam){
+  var x0 = Math.round(cx - cam), y, w;
+  if(x0 < -90 || x0 > viewW + 90) return;
+  for(var a = 0; a < 5; a++)
+    fill(a < 2 ? "#efe6ff" : "#cbb8f5", x0 - 42 + a * 3, 12 + a * 2, 88 - a * 7, 2);
+  for(y = 20; y < 62; y++){
+    var t = (y - 20) / 42;
+    w = Math.round(18 + t * 30 + Math.sin(y * 0.55) * 3);
+    fill(y < 32 ? "#dcd0fa" : y < 48 ? "#b6a2ec" : "#8d78d6",
+         x0 - Math.floor(w / 2), y, w, 1);
+  }
+  for(y = 54; y < 62; y++){
+    w = Math.round(48 + Math.sin(y * 0.7) * 4);
+    fill("#6b57b4", x0 - Math.floor(w / 2), y, w, 1);
+  }
+}
+function drawStormRain(cx, cam){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -90 || x0 > viewW + 90) return;
+  for(var r = 0; r < 40; r++){
+    var drop = reduceMotion ? 0 : Math.floor(tick * 0.9 + r * 5) % 16;
+    var ry   = 60 + Math.round(rnd(r + 31) * 6) + drop;
+    if(ry >= SURFACE) continue;
+    fill("#7fd6ff", x0 - 24 + Math.round(rnd(r + 11) * 48), ry, 1, 3);
+  }
+}
+
+/* The topic here is how a natural hazard becomes a disaster, so the row of
+   buildings includes one that did not make it. */
+function drawTown(cx, cam){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -80 || x0 > viewW + 80) return;
+  [[-46,15,11],[-32,21,9],[-8,12,10],[8,18,13],[28,10,9]].forEach(function(d, i){
+    var bx = x0 + d[0], h = d[1], w = d[2], top = SURFACE - h;
+    fill("#7c7490", bx, top, w, h);
+    fill("#a79ec0", bx, top, w, 1);
+    fill("#544d68", bx + w - 2, top + 1, 2, h - 1);
+    for(var wy = top + 2; wy < SURFACE - 2; wy += 3)
+      for(var wx = bx + 1; wx < bx + w - 1; wx += 3)
+        fill("#ffc63c", wx, wy, 1, 1);
+  });
+  var rx = x0 + 44;
+  fill("#5f586e", rx, SURFACE - 6, 15, 6);
+  fill("#7c7490", rx + 2, SURFACE - 9, 5, 3);
+  fill("#7c7490", rx + 9, SURFACE - 8, 4, 2);
+  fill("#a79ec0", rx, SURFACE - 6, 15, 1);
+}
+
+function arrow(x, y, dir, len, c){
+  fill(c, dir > 0 ? x : x - len, y - 1, len, 3);
+  for(var i = 0; i < 5; i++)
+    fill(c, dir > 0 ? x + len + i : x - len - i, y - 4 + i, 1, 9 - 2 * i);
+}
+
+function drawPlates(cx, cam){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -60 || x0 > viewW + 60) return;
+  arrow(x0 - 34, 97, 1, 14, "#ffc63c");
+  arrow(x0 + 34, 97, -1, 14, "#ffc63c");
+  for(var i = 0; i < 7; i++) fill("#d4512a", x0 - 1, 92 + i, 2, 1);   // the seam
+}
+
+/* Drawn in two halves: the cone sits in front of the sky, and the chamber and
+   conduit are cut into the rock afterwards, which is what a cross-section is
+   for. */
+function drawVolcanoCone(cx, cam){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -50 || x0 > viewW + 50) return;
+  for(var k = 0; k < 24; k++){
+    var w = 3 + k;
+    fill(k < 3 ? "#7c7490" : "#5c5070", x0 - w, SURFACE - 24 + k, w * 2, 1);
+    if(k > 3 && k % 5 === 0) fill("#453b5c", x0 - w, SURFACE - 24 + k, w * 2, 1);
+  }
+  fill("#ff3d0d", x0 - 3, SURFACE - 25, 6, 3);
+  fill("#ffc63c", x0 - 2, SURFACE - 26, 4, 2);
+  for(var p = 0; p < 5; p++){
+    var rise = reduceMotion ? 0 : (Math.floor(tick * 0.3 + p * 7) % 16);
+    fill("#8b8398", x0 - 5 + p * 2, SURFACE - 28 - rise, 2, 2);
+  }
+}
+function drawVolcanoRoots(cx, cam){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -50 || x0 > viewW + 50) return;
+  for(var y = SURFACE; y < 102; y++) fill("#ff3d0d", x0 - 1, y, 3, 1);
+  for(var k = 0; k < 7; k++){
+    var w = 11 - Math.abs(k - 3) * 2;
+    fill("#ff5a1e", x0 - w, 100 + k, w * 2, 1);
+    if(k > 1 && k < 5) fill("#ffc63c", x0 - w + 2, 100 + k, w * 2 - 4, 1);
+  }
+}
+
+function drawCamp(cx, cam, colour){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -30 || x0 > viewW + 30) return;
+  for(var r = 0; r < 10; r++) fill(colour, x0 - r, SURFACE - 10 + r, 1 + r * 2, 1);
+  fill("#25103f", x0 - 2, SURFACE - 4, 4, 4);
+  fill("#efe6ff", x0 - 10, SURFACE - 1, 21, 1);
+  fill("#8b8398", x0 + 14, SURFACE - 14, 1, 14);                    // an aerial
+  fill(colour,    x0 + 15, SURFACE - 14, 5, 3);
+}
+
+function drawGate(cx, cam){
+  var x0 = Math.round(cx - cam);
+  if(x0 < -40 || x0 > viewW + 40) return;
+  var open = state.tokens >= FINALE.unlockAt;
+  fill("#5c5070", x0 - 20, SURFACE - 30, 5, 30);
+  fill("#5c5070", x0 + 15, SURFACE - 30, 5, 30);
+  fill("#7c7490", x0 - 20, SURFACE - 30, 5, 2);
+  fill("#7c7490", x0 + 15, SURFACE - 30, 5, 2);
+  fill(open ? "#ffc63c" : "#5c5070", x0 - 22, SURFACE - 35, 44, 5);
+  if(!open) for(var b = 0; b < 4; b++)
+    fill("#8b8398", x0 - 15, SURFACE - 27 + b * 7, 30, 3);
+}
 
 /* ----------------------------------------------------------------------------
    Canvas
@@ -2067,53 +2289,95 @@ function drawSprite(sx, sy, legs, dir){
 
 function drawHazard(o, sx, h){
   var top = Math.round(o.base) - h, x = sx - Math.floor(o.w / 2), w = o.w;
+  var i, k, t, iw, bx, sway;
   if(h <= 1) return;
   switch(o.kind){
-    case "gust":
-      for(var i = 0; i < 4; i++){
-        var yy = top + i * 3, len = 5 + ((i + Math.floor(tick / 8)) % 3) * 4;
-        fill("#dff6ff", x + (i % 2) * 3, yy, len, 1);
-        fill("#8fd8ef", x + (i % 2) * 3 + len, yy, 3, 1);
+
+    case "gust":                                   /* a curl of jet-stream wind */
+      for(k = 0; k < h; k++){
+        t    = k / (h - 1);
+        iw   = Math.max(3, Math.round(3 + Math.sin(t * Math.PI) * w * 0.46));
+        sway = reduceMotion ? 0 : Math.round(Math.sin(t * 3.1 + tick * 0.17) * 2);
+        bx   = x + Math.floor((w - iw) / 2) + sway;
+        fill(k % 2 ? "#e8fbff" : "#8fd8ef", bx, top + k, iw, 1);
+      }
+      fill("#ffffff", x + Math.floor(w / 2) - 1, top + 2, 2, h - 4);
+      for(i = 0; i < 3; i++){                      // torn off downwind
+        var len = 5 + ((i + Math.floor(tick / 8)) % 3) * 3;
+        fill("#dff6ff", x - len - 1, top + 2 + i * 4, len, 1);
       }
       break;
-    case "ice":
-      fill("#bde9ff", x, top, w, h);
-      fill("#ffffff", x, top, w, 2);
-      fill("#6bb6d8", x, top + h - 3, w, 3);
-      fill("#ffffff", x + 3, top + 4, 1, h - 8);
+
+    case "ice":                                    /* a block with facets */
+      fill("#8fd0ee", x, top + 2, w, h - 2);
+      fill("#cdeeff", x + 1, top + 3, w - 3, h - 6);
+      for(i = 0; i < w; i += 3)                    // a broken upper surface
+        fill("#ffffff", x + i, top + (i % 2 ? 0 : 2), 3, 3);
+      fill("#5f9fc4", x, top + h - 3, w, 3);
+      fill("#ffffff", x + 3, top + 5, 1, h - 9);
+      fill("#ffffff", x + w - 5, top + 4, 1, 4);
       break;
-    case "eye":
-      fill("#2a2050", x, top, w, h);
-      for(var s = 0; s < h; s += 2){
-        var off = Math.round(Math.sin((s + tick * 0.18) * 0.5) * 3);
-        fill(s < h / 3 ? "#efe6ff" : "#9d8fe0", x + 2 + off, top + s, w - 4, 1);
-      }
-      fill("#120826", x + Math.floor(w / 2) - 1, top + Math.floor(h / 2), 2, 3);
-      break;
-    case "rubble":
-      fill("#8b8398", x, top + 4, w, h - 4);
-      fill("#b3aac2", x, top + 4, w, 2);
-      fill("#5f586e", x + 2, top + h - 4, w - 4, 2);
-      fill("#8b8398", x + 4, top, 5, 5);
-      fill("#d8cfe4", x + 4, top, 5, 1);
-      break;
-    case "shard":
-      for(var k = 0; k < h; k++){
-        var iw = Math.max(2, Math.round(w * (1 - k / h) * 0.5) * 2);
-        fill(k < 3 ? "#d4512a" : "#7a4327", x + Math.floor((w - iw) / 2), top + k, iw, 1);
+
+    case "eye":                                    /* the eyewall, spinning */
+      for(k = 0; k < h; k++){
+        t    = k / (h - 1);
+        iw   = Math.max(4, Math.round((w * (1 - t * 0.6)) / 2) * 2);
+        sway = reduceMotion ? 0 : Math.round(Math.sin(k * 0.62 + tick * 0.14) * 1.7);
+        bx   = x + Math.floor((w - iw) / 2) + sway;
+        fill(k % 3 === 0 ? "#efe6ff" : "#a893e0", bx, top + k, iw, 1);
+        fill("#3f2296", bx + Math.floor(iw / 2) - 1, top + k, 2, 1);   // the eye
       }
       break;
-    case "lava":
-      fill("#ff3d0d", x + 2, top, w - 4, h);
-      fill("#ffc63c", x + 4, top + 1, w - 8, h - 2);
-      fill("#fff2c0", x + Math.floor(w / 2) - 1, top, 2, 4);
-      fill("#3a1f13", x, Math.round(o.base) - 2, w, 3);
+
+    case "rubble":                                 /* what the shaking left */
+      fill("#7c7490", x, top + 4, w, h - 4);
+      fill("#a79ec0", x, top + 4, w, 2);
+      fill("#4a4360", x + 2, top + h - 3, w - 4, 3);
+      fill("#7c7490", x + 4, top, 6, 5);
+      fill("#a79ec0", x + 4, top, 6, 1);
+      fill("#4a4360", x + 1, top + 7, 3, 1);
+      fill("#4a4360", x + w - 6, top + 9, 4, 1);
       break;
-    case "wave":
-      fill("#1f7fd0", x, top + 3, w, h - 3);
-      fill("#5cc4f5", x, top + 3, w, 2);
-      for(var f = 0; f < 4; f++)
-        fill("#ffffff", x + 2 + f * 4, top + ((f + Math.floor(tick / 10)) % 2), 3, 2);
+
+    case "shard":                                  /* a fault scarp, thrown up */
+      for(k = 0; k < h; k++){
+        t  = k / (h - 1);                          // 0 at the tip, 1 at the base
+        iw = Math.max(2, Math.round((w * (0.22 + 0.78 * t)) / 2) * 2);
+        bx = x + Math.floor((w - iw) / 2);
+        fill(k < 3 ? "#d4512a" : (k % 5 === 0 ? "#8f5030" : "#6b3a22"), bx, top + k, iw, 1);
+        if(k > 3 && k % 5 === 0) fill("#a8613a", bx, top + k, iw, 1);
+      }
+      fill("#ffb27a", x + Math.floor(w / 2) - 1, top, 2, 3);
+      break;
+
+    case "lava":                                   /* a spurt, on a timer */
+      fill("#2a1a10", x, Math.round(o.base) - 3, w, 4);
+      fill("#0f0806", x + 3, Math.round(o.base) - 3, w - 6, 2);
+      for(k = 0; k < h; k++){
+        t    = k / (h - 1);
+        iw   = Math.max(2, Math.round((w * (0.2 + 0.8 * t) * 0.72) / 2) * 2);
+        sway = reduceMotion ? 0 : Math.round(Math.sin(k * 0.85 + tick * 0.22) * 1.2);
+        bx   = x + Math.floor((w - iw) / 2) + sway;
+        fill("#ff3d0d", bx, top + k, iw, 1);
+        if(iw > 4) fill("#ffc63c", bx + 1, top + k, iw - 2, 1);
+        if(iw > 7) fill("#fff2c0", bx + 2, top + k, iw - 4, 1);
+      }
+      break;
+
+    case "wave":                                   /* a surge, about to break */
+      for(k = 0; k < h; k++){
+        t  = k / (h - 1);
+        iw = Math.max(3, Math.round(w * (0.4 + 0.6 * t)));
+        fill(t < 0.3 ? "#5cc4f5" : t < 0.7 ? "#1f7fd0" : "#12508a",
+             x + (w - iw), top + k, iw, 1);
+      }
+      fill("#ffffff", x + w - 8, top,     8, 2);   // the crest, curling over
+      fill("#ffffff", x + w - 10, top + 2, 4, 1);
+      fill("#dff2ff", x + w - 12, top + 3, 3, 1);
+      for(i = 0; i < 3; i++){
+        var ph = reduceMotion ? 0 : Math.floor(tick / 9 + i) % 2;
+        fill("#c9edff", x + 2 + i * 5, top + 6 + i * 2 + ph, 3, 1);
+      }
       break;
   }
 }
@@ -2128,38 +2392,62 @@ function drawCourse(){
   var cam = Math.floor(camX), x, y, wx, g;
 
   /* --- the atmosphere, in bands, dithered where one gives way to the next --- */
-  fill("#2b1466", 0, 0,  viewW, 26);
-  fill("#3f2296", 0, 26, viewW, 16);
-  fill("#5b3fd6", 0, 42, viewW, 16);
-  fill("#7d5eea", 0, 58, viewW, 10);
-  fill("#9d86f2", 0, 68, viewW, SURFACE - 68);
-  ditherRow("#3f2296", 25, cam); ditherRow("#3f2296", 24, cam);
-  ditherRow("#5b3fd6", 41, cam); ditherRow("#7d5eea", 57, cam);
-  ditherRow("#9d86f2", 67, cam);
+  fill("#2b1466", 0, 0,  viewW, 24);
+  fill("#3f2296", 0, 24, viewW, 16);
+  fill("#5b3fd6", 0, 40, viewW, 16);
+  fill("#7d5eea", 0, 56, viewW, 10);
+  fill("#9d86f2", 0, 66, viewW, SURFACE - 66);
+  ditherRow("#3f2296", 23, cam); ditherRow("#3f2296", 22, cam);
+  ditherRow("#5b3fd6", 39, cam); ditherRow("#7d5eea", 55, cam);
+  ditherRow("#9d86f2", 65, cam);
 
-  /* --- scenery behind everything, at its own parallax --- */
+  /* --- everything behind the ground --- */
   SCENERY.forEach(function(s){
     var px = Math.round(s.x - cam * s.p);
     if(s.t === "star"){
       px = ((px % WORLD_W) + WORLD_W) % WORLD_W;
       if(px < viewW) fill(rnd(s.x) > 0.6 ? "#ffffff" : "#c9b6ff", px, s.y, 1, 1);
-    } else if(s.t === "cloud"){
-      if(px > -40 && px < viewW){
-        var drift = reduceMotion ? 0 : Math.round(Math.sin(tick * 0.006 + s.x) * 3);
-        fill("rgba(255,255,255,.20)", px + drift, s.y, s.w, 3);
-        fill("rgba(255,255,255,.13)", px + drift + 2, s.y - 2, s.w - 5, 2);
-      }
     }
+  });
+  LANDMARKS.forEach(function(l){
+    if(l.t === "rainbow") drawRainbow(l.x, cam);
+  });
+  SCENERY.forEach(function(s){
+    var px = Math.round(s.x - cam * s.p);
+    if(px < -60 || px > viewW) return;
+    if(s.t === "cirrus"){
+      fill("rgba(255,255,255,.22)", px, s.y, s.w, 1);
+      fill("rgba(255,255,255,.13)", px + 4, s.y + 2, s.w - 9, 1);
+    } else if(s.t === "cloud"){
+      var drift = reduceMotion ? 0 : Math.round(Math.sin(tick * 0.006 + s.x) * 3);
+      fill("rgba(255,255,255,.20)", px + drift, s.y, s.w, 3);
+      fill("rgba(255,255,255,.13)", px + drift + 2, s.y - 2, s.w - 5, 2);
+    }
+  });
+  LANDMARKS.forEach(function(l){
+    if(l.t === "storm")   drawStorm(l.x, cam);
+    if(l.t === "volcano") drawVolcanoCone(l.x, cam);
   });
 
   /* --- the ocean, which is where the first half of the course happens --- */
   var seaEnd = Math.min(viewW, LAND_X - cam);
   if(seaEnd > 0){
-    fill("#1f7fd0", 0, SURFACE, seaEnd, 8);
-    fill("#145a9e", 0, SURFACE + 8, seaEnd, 16);
-    fill("#0d3d72", 0, SURFACE + 24, seaEnd, VIEW_H - SURFACE - 24);
-    ditherRow("#145a9e", SURFACE + 7, cam);
-    ditherRow("#0d3d72", SURFACE + 23, cam);
+    fill("#1f7fd0", 0, SURFACE,      seaEnd, 8);
+    fill("#145a9e", 0, SURFACE + 8,  seaEnd, 10);
+    fill("#0d3d72", 0, SURFACE + 18, seaEnd, 96 - SURFACE - 18);
+    ditherRow("#145a9e", SURFACE + 7,  cam);
+    ditherRow("#0d3d72", SURFACE + 17, cam);
+    /* oceanic crust: thinner than the continental kind, and the reason the
+       depth ruler down the left is telling the truth */
+    fill("#3a1f13", 0, 96,  seaEnd, VIEW_H - 96);
+    fill("#5c3320", 0, 96,  seaEnd, 2);
+    fill("#c8391c", 0, 104, seaEnd, VIEW_H - 104);
+    ditherRow("#3a1f13", 95,  cam);
+    ditherRow("#c8391c", 103, cam);
+    for(x = 0; x < seaEnd; x++){
+      if((x + cam) % 9 === 0) fill("#4a2a1a", x, 98, 1, 4);
+      if((x + cam + Math.floor(tick / 14)) % 6 === 0) fill("#ff9a2e", x, 104, 1, 2);
+    }
     for(x = 0; x < seaEnd; x += 7){
       var bob = reduceMotion ? 0 : Math.round(Math.sin((x + cam + tick * 0.5) * 0.25));
       fill("#7fd6ff", x, SURFACE + bob, 4, 1);
@@ -2187,6 +2475,10 @@ function drawCourse(){
     if(s1 < VIEW_H) fill("#5c3320", x, s1, 1, VIEW_H - s1);
     if(s2 < VIEW_H) fill("#3a1f13", x, s2, 1, VIEW_H - s2);
     if(s3 < VIEW_H) fill("#c8391c", x, s3, 1, VIEW_H - s3);
+    if(s1 < VIEW_H && (wx + s1) % 2 === 0) fill("#8a4b2c", x, s1 - 1, 1, 1);
+    if(s2 < VIEW_H && (wx + s2) % 2 === 0) fill("#5c3320", x, s2 - 1, 1, 1);
+    if(s3 < VIEW_H && (wx + s3) % 2 === 0) fill("#3a1f13", x, s3 - 1, 1, 1);
+    if(g < 90 && (wx * 7 + g) % 23 === 0) fill("#6b3d24", x, g + 6, 1, 3);
     if(s3 < VIEW_H && (wx + Math.floor(tick / 12)) % 5 === 0) fill("#ff9a2e", x, s3, 1, 2);
 
     /* the surface edge, which gets hotter the deeper you have cut into it */
@@ -2201,13 +2493,24 @@ function drawCourse(){
     }
   }
 
+  /* --- landmarks that belong in front of, or cut into, the ground --- */
+  LANDMARKS.forEach(function(l){
+    if(l.t === "storm")   drawStormRain(l.x, cam);
+    if(l.t === "volcano") drawVolcanoRoots(l.x, cam);
+    if(l.t === "plates")  drawPlates(l.x, cam);
+    if(l.t === "town")    drawTown(l.x, cam);
+    if(l.t === "camp")    drawCamp(l.x, cam, l.colour);
+    if(l.t === "gate")    drawGate(l.x, cam);
+  });
+
   /* magma bubbles, only where there is rock to hold them */
   SCENERY.forEach(function(s){
-    if(s.t !== "bubble" || s.x < LAND_X) return;
+    if(s.t !== "bubble") return;
     var px = Math.round(s.x - cam);
     if(px < 0 || px >= viewW) return;
     var lift = reduceMotion ? 0 : Math.round(Math.sin(tick * 0.02 + s.x) * 2);
-    if(s.y + lift > groundAt(s.x)) fill("#ff9a2e", px, s.y + lift, 1, 1);
+    if(s.x >= LAND_X && s.y + lift <= groundAt(s.x)) return;
+    fill("#ff9a2e", px, s.y + lift, 1, 1);
   });
 
   /* --- the hazards --- */
@@ -2217,25 +2520,24 @@ function drawCourse(){
     drawHazard(o, px, hazardHeight(o));
   });
 
-  /* --- a post under every stop, so the signpost above it is anchored --- */
+  /* --- a signpost under every stop, so the label above it is anchored --- */
   STOPS.forEach(function(s){
     var px = Math.round(s.x - cam);
-    if(px < -10 || px > viewW + 10) return;
-    var done = state.done[s.id] !== undefined;
-    fill("#3a2a18", px - 1, s.y - 15, 2, 15);
-    fill(done ? "#3fd97f" : s.colour, px - 3, s.y - 17, 6, 3);
-    if(s.kind === "finale"){
-      fill("#ffc63c", px - 4, s.y - 22, 8, 5);
-      fill("#120826", px - 1, s.y - 21, 2, 3);
-    }
+    if(px < -12 || px > viewW + 12) return;
+    var done = state.done[s.id] !== undefined ||
+               (s.kind === "finale" && state.finaleDone);
+    fill("#efe6ff", px - 1, s.y - 20, 2, 20);
+    fill("#8f6ce0", px + 1, s.y - 20, 1, 20);
+    fill(done ? "#3fd97f" : s.colour, px - 4, s.y - 22, 9, 3);
+    fill("#25103f", px - 3, s.y - 1, 7, 1);
   });
 
   /* --- the runner --- */
   var hx = Math.round(hero.x - cam), hy = Math.round(hero.y);
   var legs = hero.ground ? SPRITE_LEGS[hero.frame] : SPRITE_JUMP;
-  fill("rgba(18,8,38,.34)", hx - 4, hy - 1, 8, 1);
+  fill("rgba(18,8,38,.34)", hx - 5, hy, 10, 1);
   if(hero.bump > 0 && Math.floor(tick / 3) % 2 === 0) ctx.globalAlpha = 0.55;
-  drawSprite(hx - 4, hy - 11, legs, hero.dir);
+  drawSprite(hx - 5, hy - HERO_H, legs, hero.dir);
   ctx.globalAlpha = 1;
 }
 
@@ -2330,7 +2632,7 @@ function stopStatus(s){
 }
 
 function renderMarkers(){
-  markerHost.innerHTML = "";
+  markerEls.forEach(function(b){ if(b.parentNode) b.parentNode.removeChild(b); });
   markerEls = STOPS.map(function(s){
     var b = el("button", "mark");
     b.setAttribute("data-kind", s.kind);
@@ -2356,6 +2658,57 @@ function updateMarker(b, s){
   b.setAttribute("aria-label", s.full + ". " + stopStatus(s) + (locked ? ". Locked." : ""));
 }
 
+/* ----------------------------------------------------------------------------
+   The dialog. Standing next to a signpost opens a window at you, which is both
+   the thing that tells you what the stop is and the thing you press to enter.
+   ---------------------------------------------------------------------------- */
+var nearBox, nearShown = null, dismissed = null;
+
+function dialogLine(s){
+  var earned = state.done[s.id];
+  if(s.kind === "finale"){
+    if(state.finaleDone) return "Complete. Run it again with a new plan.";
+    return state.tokens >= FINALE.unlockAt
+      ? "Ready. Budget: ◈ " + state.tokens + "."
+      : "Needs ◈ " + FINALE.unlockAt + ". You have ◈ " + state.tokens + ".";
+  }
+  if(s.kind === "compare" && !compareReady(s.pair))
+    return "Study both halves of the " + s.pair.name.toLowerCase() + " first.";
+  if(earned !== undefined) return "Done · ◈ " + earned + " earned. Worth another run.";
+  var u = stopUnit(s);
+  return u ? u.qs.length + " challenges · up to ◈ " + (u.qs.length * 3) : "";
+}
+
+function renderNearBox(s){
+  var done   = state.done[s.id] !== undefined || (s.kind === "finale" && state.finaleDone);
+  var locked = stopState(s) === "locked";
+  var title  = s.kind === "topic"   ? s.ref + " " + s.label
+             : s.kind === "study"   ? "Case study"
+             : s.kind === "compare" ? "Comparison"
+             :                        "Level finale";
+  nearBox.className = "dlg" + (done ? " done" : "") + (locked ? " locked" : "");
+  nearBox.innerHTML =
+    '<div class="dlgbar">' +
+      '<span class="dt">' + esc(title.toUpperCase()) + '</span>' +
+      '<i aria-hidden="true">–</i><i aria-hidden="true">□</i>' +
+      '<button class="dx" aria-label="Dismiss">✕</button>' +
+    '</div>' +
+    '<div class="dlgbody">' +
+      '<p class="dq">' + esc(s.full) + '</p>' +
+      '<p class="dm">' + esc(dialogLine(s)) + '</p>' +
+      '<button class="dgo"' + (locked ? " disabled" : "") + '>' +
+        (locked ? "LOCKED" : done ? "AGAIN" : "OPEN") +
+      '</button>' +
+    '</div>';
+  nearBox.querySelector(".dx").addEventListener("click", function(e){
+    e.stopPropagation();
+    dismissed = s.id;
+    nearBox.hidden = true;
+  });
+  if(!locked)
+    nearBox.querySelector(".dgo").addEventListener("click", function(){ openStop(s); });
+}
+
 function placeMarkers(){
   var cam = Math.floor(camX), near = nearestStop();
   for(var i = 0; i < STOPS.length; i++){
@@ -2365,13 +2718,23 @@ function placeMarkers(){
     if(px < -220 || px > viewW * PX + 220){ b.style.visibility = "hidden"; continue; }
     b.style.visibility = "visible";
     b.style.left = px + "px";
-    b.style.top  = ((s.y - 20) * PX) + "px";
-    var isNear = near === s;
-    if(isNear !== b.classList.contains("near")){
-      if(stopState(s) === "open" && state.done[s.id] === undefined) b.classList.toggle("near", isNear);
-      else b.classList.remove("near");
-    }
+    var top = (s.y - 22) * PX, h = b.offsetHeight || 58;
+    b.style.top = Math.max(h + 4, top) + "px";
+    /* the plate steps aside for the dialog when you are standing at it */
+    if(near === s && near.id !== dismissed) b.style.visibility = "hidden";
   }
+
+  if(near && near.id !== dismissed){
+    if(nearShown !== near.id){ nearShown = near.id; renderNearBox(near); }
+    nearBox.hidden = false;
+    nearBox.style.left = ((near.x - cam) * PX) + "px";
+    var dh = nearBox.offsetHeight || 118;
+    nearBox.style.top = Math.max(dh + 4, (near.y - 22) * PX) + "px";
+  } else {
+    nearBox.hidden = true;
+    if(!near) nearShown = null;
+  }
+  if(!near) dismissed = null;
   var w = document.getElementById("whereNow");
   if(w){
     var txt = near ? (stopState(near) === "locked"
@@ -2605,6 +2968,7 @@ function renderAll(){
   renderCases();
   renderTopics();
   renderFinaleCard();
+  nearShown = null;
   for(var i = 0; i < STOPS.length; i++) if(markerEls[i]) updateMarker(markerEls[i], STOPS[i]);
 }
 
@@ -3510,6 +3874,7 @@ function resolve(bought, spent, budget){
 stage       = document.getElementById("stage");
 cv          = document.getElementById("world");
 markerHost  = document.getElementById("markers");
+nearBox     = document.getElementById("nearBox");
 
 document.getElementById("resetBtn").addEventListener("click", function(){
   if(!confirm("Wipe all progress and start Level 1 again?")) return;

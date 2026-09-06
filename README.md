@@ -41,6 +41,9 @@ behind it has just taught: a jet-stream gust, an ice-age cold snap, a cyclone
 eyewall, collapsed masonry, a fault scarp, a lava spurt that rises and falls on a
 timer, a tsunami surge. You jump them.
 
+Walk up to a signpost and it opens a window at you, with the topic, what it is
+worth, and the button that starts it.
+
 `←` `→` run · `↑` jump · `↵` opens the stop you are standing at. Clicking a
 signpost takes you straight there, and the course index below the world does the
 same thing for anyone who would rather not platform — nothing is reachable only
