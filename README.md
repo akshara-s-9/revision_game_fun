@@ -14,7 +14,18 @@ You move between them by running and jumping along a side-scrolling course.
 ## Play it
 
 Open `index.html` in any browser. That's it — no install, no build step, no
-internet connection required. It is a single self-contained file.
+internet connection required.
+
+Two files, which need to sit in the same folder:
+
+| File | What it holds |
+|---|---|
+| `content.js` | Everything you revise from: the topics, the case studies, every question and explanation, and the finale |
+| `index.html` | The engine that draws and runs it |
+
+The split is there so that writing questions never means going near the game
+code. `content.js` loads as a plain script, so the game stays a double-click
+away with no server involved.
 
 ## How it works
 
@@ -129,8 +140,8 @@ Progress saves automatically in your browser. **Reset** wipes it.
 
 ## Adding or editing questions
 
-All content lives in one place near the top of `index.html`, under
-`1. GAME CONTENT`. You never need to touch the engine code below it.
+All content lives in `content.js`. You never need to open `index.html` to add,
+edit or remove a question.
 
 There are two arrays, matching the two halves of the game.
 
@@ -178,7 +189,8 @@ The other formats:
 - `{ t:"order", q, items:[...] }` — `items` in the **correct** order; the game shuffles them.
 - `{ t:"match", q, pairs:[[term, meaning], ...] }`
 - `{ t:"label", q, diagram:"cyclone"|"destructive", targets:[{id, prompt}] }` —
-  `id` must match a `data-id` on a hotspot in that diagram (see `8. DIAGRAMS`).
+  `id` must match a `data-id` on a hotspot in that diagram (see `7. DIAGRAMS`
+  in `index.html`).
 - `{ t:"data", chart:{...}, q, opts, a }` — `chart.kind` is `"bars"`, `"table"` or `"line"`.
 - `{ t:"exam", marks:4, q, guidance, scheme:[{p, r}, ...] }` — point-marked.
   `p` is the point (1 mark), `r` is the reason that develops it (1 further mark).
@@ -192,7 +204,8 @@ Every question needs a `why`. That explanation is the point of the game.
 Stops are laid out along the course automatically, in the order they appear in
 `TOPICS` and then `PAIRS`, so adding a topic extends the level. How deep each
 topic sits is one number in `TOPIC_DEPTH`, and the hazard standing after it is
-one name in `GAP_HAZARD` — both at the top of `4. THE COURSE`.
+one name in `GAP_HAZARD` — both at the top of `3. THE COURSE` in `index.html`,
+and the only two places the engine needs telling about new content.
 
 ## Levels 2–9
 
