@@ -40,7 +40,7 @@ var TOPICS = [
   id:"circulation", ref:"1.1", name:"Global atmospheric circulation",
   short:"Circulation",
   theme:"Cells, pressure belts, winds, and the pattern of world climate zones",
-  brief:"Three circulation cells in each hemisphere carry surplus heat from the tropics towards the poles. Where air rises you get low pressure and rain; where it sinks you get high pressure and desert. Get this straight and the position of the rainforests, the hot deserts, the trade winds and the tropical cyclone belts all follow from it. Switch on 'Show circulation cells' on the map to see the bands.",
+  brief:"Three circulation cells in each hemisphere carry surplus heat from the tropics towards the poles. Where air rises you get low pressure and rain; where it sinks you get high pressure and desert. Get this straight and the position of the rainforests, the hot deserts, the trade winds and the tropical cyclone belts all follow from it. The depth ruler down the side of the course marks the same bands: you start this topic up in them.",
   keys:["Hadley · Ferrel · Polar","Rising air = low pressure","Sinking air = high pressure","Coriolis deflection","The ITCZ"],
   qs:[
     { t:"order",
@@ -336,7 +336,7 @@ var TOPICS = [
   id:"plates", ref:"1.5", name:"Earth's structure and plate boundaries",
   short:"Plate boundaries",
   theme:"What is inside the Earth, what moves the plates, and the four types of boundary",
-  brief:"Beneath a thin crust lies the mantle, and convection in it — helped by the pull of dense subducting slabs — drags the plates across the surface. Almost every tectonic hazard happens where two plates meet, and there are four ways they can meet: pulling apart, colliding with subduction, colliding without it, and sliding past. Each produces a distinctive set of landforms and hazards. The coloured lines on the map show where each type runs.",
+  brief:"Beneath a thin crust lies the mantle, and convection in it — helped by the pull of dense subducting slabs — drags the plates across the surface. Almost every tectonic hazard happens where two plates meet, and there are four ways they can meet: pulling apart, colliding with subduction, colliding without it, and sliding past. Each produces a distinctive set of landforms and hazards. The course cuts down into the crust here, so you can see the boundary in section as you run past it.",
   keys:["Crust · mantle · core","Convection and slab pull","Constructive","Destructive","Conservative","Collision"],
   qs:[
     { t:"match",
@@ -569,7 +569,7 @@ var TOPICS = [
 /* ----------------------------------------------------------------------------
    CASE STUDIES — separate from the topics, in two linked pairs.
    Each pair holds two studies plus a comparison that unlocks once both are done.
-   The `lon`/`lat` on each study places its pin on the map.
+   `short` is the label on the study's signpost out on the course.
    ---------------------------------------------------------------------------- */
 
 var PAIRS = [
